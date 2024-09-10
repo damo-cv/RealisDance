@@ -1,0 +1,94 @@
+image_finetune: False
+
+output_dir: "outputs"
+pretrained_model_path: "pretrained_models/RV/rv-5-1"
+pretrained_clip_path: "pretrained_models/DINO/dinov2"
+pretrained_mm_path: "pretrained_models/MM/mm_v2.ckpt"
+pretrained_vae_path: "pretrained_models/StableDiffusion/sd-1-5"
+
+unet_additional_kwargs:
+  use_motion_module              : True
+  motion_module_resolutions      : [ 1,2,4,8 ]
+  unet_use_cross_frame_attention : False
+  unet_use_temporal_attention    : False
+
+  motion_module_type: Vanilla
+  motion_module_kwargs:
+    num_attention_heads                : 8
+    num_transformer_block              : 1
+    attention_block_types              : [ "Temporal_Self", "Temporal_Self" ]
+    temporal_position_encoding         : True
+    temporal_position_encoding_max_len : 32
+    temporal_attention_dim_div         : 1
+    zero_initialize                    : True
+
+pose_guider_kwargs:
+  pose_guider_type:     "side_guider"
+  args:
+    out_channels:       [ 320, 320, 640, 1280, 1280 ]
+
+clip_projector_kwargs:
+  projector_type:        "ff"
+  in_features:           1024
+  out_features:          768
+
+zero_snr:                True
+v_pred:                  True
+train_cfg:               False
+snr_gamma:               5.0
+fix_ref_t:               True
+pose_shuffle_ratio:      0.05
+
+vae_slicing:             True
+fps:                     8
+
+validation_kwargs:
+  guidance_scale:        2
+
+train_data:
+  - dataset:
+      dataset_class: VideoDataset
+      args:
+        root_dir: "~/video_dance_data"
+        split: "train"
+        sample_size: [ 768, 576 ]
+        clip_size: [ 320, 240 ]
+        image_finetune: False
+        ref_mode: "random"
+        sample_n_frames: 16
+
+validation_data:
+  dataset_class: VideoDataset
+  args:
+    root_dir: "~/video_dance_data"
+    split: "val"
+    sample_size: [ 768, 576 ]
+    clip_size: [ 320, 240 ]
+    image_finetune: False
+    ref_mode: "first"
+    sample_n_frames: 16
+    start_pixel: 0
+    fix_gap: True
+
+trainable_modules:
+  - "motion_modules."
+
+unet_checkpoint_path: "outputs/stage1_hamer/checkpoints/checkpoint-final.ckpt"
+
+lr_scheduler:     "constant_with_warmup"
+learning_rate:    1e-5
+lr_warmup_steps:  5000
+train_batch_size: 1
+validation_batch_size: 1
+
+max_train_epoch:      -1
+max_train_steps:      100000
+checkpointing_epochs: -1
+checkpointing_steps:  10000
+checkpointing_steps_tuple:  [ 2, 5000 ]
+
+
+global_seed: 42
+mixed_precision: "fp16"
+
+is_debug: False

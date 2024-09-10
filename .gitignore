@@ -1,0 +1,9 @@
+inputs
+outputs
+log
+datasets
+*.pyc
+pretrained_models/
+*__pycache__
+*_bak*
+.idea
