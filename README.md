@@ -1,7 +1,7 @@
 # RealisDance: Equip controllable character animation with realistic hands
 
 
-This repository is the official implementation of [RealisDance]().
+This repository is the official implementation of [RealisDance](https://arxiv.org/abs/2409.06202).
 RealisDance enhances pose control of existing controllable character animation methods,
 achieving robust generation, smooth motion, and realistic hand quality. 
 The architecture of RealisDance is shown as follow:
@@ -133,7 +133,7 @@ Jingkai Zhou: [fs.jingkaizhou@gmail.com](mailto:fs.jingkaizhou@gmail.com)
 @article{zhou2024realisdance,,
   title={RealisDance: Equip controllable character animation with realistic hands},
   author={Zhou, Jingkai and Wang, Benzhi and Chen, Weihua and Bai, Jingqi and Li, Dongyang and Zhang, Aixi and Xu, Hao and Yang, Mingyang and Wang, Fan},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:2409.06202},
   year={2024}
 }
 ```
