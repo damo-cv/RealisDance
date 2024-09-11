@@ -1,5 +1,3 @@
-# Adapted from https://github.com/showlab/Tune-A-Video/blob/main/tuneavideo/pipelines/pipeline_tuneavideo.py
-
 import inspect
 from typing import Callable, List, Optional, Union
 from dataclasses import dataclass
