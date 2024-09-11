@@ -404,7 +404,24 @@ class RealisDancePipeline(DiffusionPipeline):
         # Post-processing
         video = self.decode_latents(latents)
         if do_color_restore:
-            video = color_restore(video, ref_image)
+            ref_image = (ref_image / 2 + 0.5).clamp(0, 1)
+            ref_image = ref_image.cpu().float().numpy()  # b c h w
+            mean_ref = ref_image.mean(axis=(-1, -2), keepdims=True)
+            std_ref = ref_image.std(axis=(-1, -2), keepdims=True)
+
+            if len(video.shape) == 4:
+                mean_video = video.mean(axis=(-1, -2), keepdims=True)
+                std_video = video.std(axis=(-1, -2), keepdims=True)
+            else:
+                mean_video = video.mean(axis=(-1, -2, -3), keepdims=True)
+                std_video = video.std(axis=(-1, -2, -3), keepdims=True)
+                mean_ref = mean_ref[:, :, None, :, :]
+                std_ref = std_ref[:, :, None, :, :]
+
+            std_video[std_video < 1e-10] = 1e-10
+            video = (video - mean_video) * std_ref / std_video + mean_ref
+            video = np.clip(video, 0, 1)
+
         # Convert to tensor
         if output_type == "tensor":
             video = torch.from_numpy(video)
