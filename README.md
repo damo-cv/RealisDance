@@ -46,22 +46,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### 2. Quick Inference
-
-- Download our trained RealisDance [chekcpoint](https://huggingface.co/theFoxofSky/RealisDance).
-
-- Prepare your reference image (a half-body selfie with a clean background will get better results).
-
-- Inference with Demo sequences
-
-```commandline
-python inference.py --config configs/stage2_hamer.yaml --smpl __assets__/demo_seq/smpl_1.mp4 \
-    --hamer __assets__/demo_seq/hamer_1.mp4 --dwpose __assets__/demo_seq/dwpose_1.pkl \
-    --ckpt $PATH-TO-CKPT --ref $PATH-TO-REF-IMG --output $PATH-TO-OUTPUT
-```
-
-
-### 3. Prepare Pretrained Checkpoints
+### 2. Prepare Pretrained Checkpoints
 
 ```
 mkdir pretrained_models
@@ -88,6 +73,20 @@ cd ../
 (Optional)
 # prepare sd-vae-ft-mse
 # link to a SD dir with a subfolder named 'sd-vae-ft-mse' 
+```
+
+### 3. Quick Inference
+
+- Download our trained RealisDance [chekcpoint](https://huggingface.co/theFoxofSky/RealisDance).
+
+- Prepare your reference image (a half-body selfie with a clean background will get better results).
+
+- Inference with Demo sequences
+
+```commandline
+python inference.py --config configs/stage2_hamer.yaml --smpl __assets__/demo_seq/smpl_1.mp4 \
+    --hamer __assets__/demo_seq/hamer_1.mp4 --dwpose __assets__/demo_seq/dwpose_1.pkl \
+    --ckpt $PATH-TO-CKPT --ref $PATH-TO-REF-IMG --output $PATH-TO-OUTPUT
 ```
 
 ### 4. Prepare Datasets
