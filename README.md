@@ -36,7 +36,7 @@ Here are several **finger dances** genereated by RealisDance.
 
 ## Quick Start
 
-### 1. Setup repository and environment
+### 1. Setup Repository and Environment
 
 ```
 git clone https://github.com/theFoxofSky/RealisDance.git
@@ -61,7 +61,7 @@ python inference.py --config configs/stage2_hamer.yaml --smpl __assets__/demo_se
 ```
 
 
-### 3. Prepare Pretrained checkpoints
+### 3. Prepare Pretrained Checkpoints
 
 ```
 mkdir pretrained_models
@@ -109,7 +109,7 @@ Note that the dataset returns a Dict like this:
 ```
 
 
-### 5. Train your RealisDance
+### 5. Train Your RealisDance
 
 ```
 # stage1
@@ -121,7 +121,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nnodes=1 --nproc_per_node=8 \
     train.py --config configs/stage2_hamer.yaml 
 ```
 
-### 6. Evaluate your RealisDance
+### 6. Evaluate Your RealisDance
 
 ```
 # stage1
