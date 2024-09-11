@@ -30,6 +30,7 @@ from einops import rearrange
 
 from src.models.rd_unet import RealisDanceUnet
 from src.pipelines.context import get_context_scheduler
+from src.utils.util import color_restore
 
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
@@ -287,6 +288,7 @@ class RealisDancePipeline(DiffusionPipeline):
         context_batch_size: int = 1,
         context_schedule: str = "uniform",
         fake_uncond: bool = True,
+        do_color_restore: bool = True,
         **kwargs,
     ):
         # TODO: support multiple images per prompt
@@ -403,7 +405,8 @@ class RealisDancePipeline(DiffusionPipeline):
 
         # Post-processing
         video = self.decode_latents(latents)
-
+        if do_color_restore:
+            video = color_restore(video, ref_image)
         # Convert to tensor
         if output_type == "tensor":
             video = torch.from_numpy(video)
