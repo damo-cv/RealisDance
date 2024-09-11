@@ -1,4 +1,3 @@
-# Adapted from https://github.com/s9roll7/animatediff-cli-prompt-travel/tree/main
 import numpy as np
 from typing import Callable, Optional, List
 
