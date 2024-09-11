@@ -46,7 +46,22 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### 2. Prepare Pretrained checkpoints
+### 2. Quick Inference
+
+- Download our trained RealisDance [chekcpoint](https://huggingface.co/theFoxofSky/RealisDance).
+
+- Prepare your reference image (half-body selfie with clean background will get better results).
+
+- Inference with Demo sequences
+
+```commandline
+python inference.py --config configs/stage2_hamer.yaml --smpl __assets__/demo_seq/smpl_1.mp4 \
+    --hamer __assets__/demo_seq/hamer_1.mp4 --dwpose __assets__/demo_seq/dwpose_1.pkl \
+    --ckpt $PATH-TO-CKPT --ref $PATH-TO-REF-IMG --output $PATH-TO-OUTPUT
+```
+
+
+### 3. Prepare Pretrained checkpoints
 
 ```
 mkdir pretrained_models
@@ -75,9 +90,7 @@ cd ../
 # link to a SD dir with a subfolder named 'sd-vae-ft-mse' 
 ```
 
-You can also download our trained RealisDance [chekcpoint]() (Coming Soon).
-
-### 3. Prepare Datasets
+### 4. Prepare Datasets
 
 The structure of our dataset is highly customized, so you need to refer to our code to **REWRITE** the dataset part.
 
@@ -96,7 +109,7 @@ Note that the dataset returns a Dict like this:
 ```
 
 
-### 4. Train your RealisDance
+### 5. Train your RealisDance
 
 ```
 # stage1
@@ -108,7 +121,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nnodes=1 --nproc_per_node=8 \
     train.py --config configs/stage2_hamer.yaml 
 ```
 
-### 5. Evaluate your RealisDance
+### 6. Evaluate your RealisDance
 
 ```
 # stage1
@@ -133,7 +146,7 @@ Jingkai Zhou: [fs.jingkaizhou@gmail.com](mailto:fs.jingkaizhou@gmail.com)
 @article{zhou2024realisdance,,
   title={RealisDance: Equip controllable character animation with realistic hands},
   author={Zhou, Jingkai and Wang, Benzhi and Chen, Weihua and Bai, Jingqi and Li, Dongyang and Zhang, Aixi and Xu, Hao and Yang, Mingyang and Wang, Fan},
-  journal={arXiv preprint arXiv:2409.06202},
+  journal={arXiv preprint arXiv:},
   year={2024}
 }
 ```
