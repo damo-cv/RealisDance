@@ -81,7 +81,7 @@ cd ../
 
 - Prepare your reference image (a half-body selfie with a clean background will get better results).
 
-- Inference with Demo sequences
+- Inference with demo sequences
 
 ```commandline
 python inference.py --config configs/stage2_hamer.yaml --smpl __assets__/demo_seq/smpl_1.mp4 \
