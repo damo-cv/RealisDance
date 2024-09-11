@@ -1,9 +1,3 @@
-# *************************************************************************
-# This file may have been modified by Bytedance Inc. (“Bytedance Inc.'s Mo-
-# difications”). All Bytedance Inc.'s Modifications are Copyright (2023) B-
-# ytedance Inc..
-# *************************************************************************
-
 # Adapted from https://github.com/s9roll7/animatediff-cli-prompt-travel/tree/main
 import numpy as np
 from typing import Callable, Optional, List
