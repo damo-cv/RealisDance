@@ -145,7 +145,7 @@ Jingkai Zhou: [fs.jingkaizhou@gmail.com](mailto:fs.jingkaizhou@gmail.com)
 @article{zhou2024realisdance,,
   title={RealisDance: Equip controllable character animation with realistic hands},
   author={Zhou, Jingkai and Wang, Benzhi and Chen, Weihua and Bai, Jingqi and Li, Dongyang and Zhang, Aixi and Xu, Hao and Yang, Mingyang and Wang, Fan},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:2409.06202},
   year={2024}
 }
 ```
