@@ -28,7 +28,6 @@ from einops import rearrange
 
 from src.models.rd_unet import RealisDanceUnet
 from src.pipelines.context import get_context_scheduler
-from src.utils.util import color_restore
 
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
@@ -157,7 +156,7 @@ class RealisDancePipeline(DiffusionPipeline):
 
         return ref_latents, clip_latents
 
-    def decode_latents(self, latents, decode_chunk_size=14):
+    def decode_latents(self, latents, ref_image, do_color_restore=True, decode_chunk_size=14):
         latents = 1 / self.vae.config.scaling_factor * latents
         if not self.image_finetune:
             video_length = latents.shape[2]
@@ -180,6 +179,18 @@ class RealisDancePipeline(DiffusionPipeline):
         video = torch.cat(video)
         if not self.image_finetune:
             video = rearrange(video, "(b f) c h w -> b c f h w", f=video_length)
+        if do_color_restore:
+            mean_ref = ref_image.mean((-1, -2), keepdims=True)
+            std_ref = ref_image.std((-1, -2), keepdims=True)
+            if self.image_finetune:
+                mean_video = video.mean((-1, -2), keepdims=True)
+                std_video = video.std((-1, -2), keepdims=True)
+            else:
+                mean_video = video.mean((-1, -2, -3), keepdims=True)
+                std_video = video.std((-1, -2, -3), keepdims=True)
+                mean_ref = mean_ref[:, :, None, :, :]
+                std_ref = std_ref[:, :, None, :, :]
+            video = (video - mean_video) * std_ref / std_video.clamp(min=1e-10) + mean_ref
         video = (video / 2 + 0.5).clamp(0, 1)
         # we always cast to float32 as this does not cause significant overhead and is compatible with bfloa16
         video = video.cpu().float().numpy()
@@ -402,25 +413,7 @@ class RealisDancePipeline(DiffusionPipeline):
                         callback(i, t, latents)
 
         # Post-processing
-        video = self.decode_latents(latents)
-        if do_color_restore:
-            ref_image = (ref_image / 2 + 0.5).clamp(0, 1)
-            ref_image = ref_image.cpu().float().numpy()  # b c h w
-            mean_ref = ref_image.mean(axis=(-1, -2), keepdims=True)
-            std_ref = ref_image.std(axis=(-1, -2), keepdims=True)
-
-            if len(video.shape) == 4:
-                mean_video = video.mean(axis=(-1, -2), keepdims=True)
-                std_video = video.std(axis=(-1, -2), keepdims=True)
-            else:
-                mean_video = video.mean(axis=(-1, -2, -3), keepdims=True)
-                std_video = video.std(axis=(-1, -2, -3), keepdims=True)
-                mean_ref = mean_ref[:, :, None, :, :]
-                std_ref = std_ref[:, :, None, :, :]
-
-            std_video[std_video < 1e-10] = 1e-10
-            video = (video - mean_video) * std_ref / std_video + mean_ref
-            video = np.clip(video, 0, 1)
+        video = self.decode_latents(latents, ref_image, do_color_restore)
 
         # Convert to tensor
         if output_type == "tensor":
