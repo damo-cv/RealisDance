@@ -67,7 +67,7 @@ cd ../
 # prepare motion module
 mkdir MM
 cd MM
-ln -s $PATH-TO-MM mm-v3
+ln -s $PATH-TO-MM mm_v2.ckpt
 cd ../
 
 (Optional)
