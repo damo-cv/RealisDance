@@ -52,26 +52,26 @@ pip install -e .
 mkdir pretrained_models
 cd pretrained_models
 
-# prepare rv-5-1
+# prepare rv-5-1 from https://huggingface.co/SG161222/Realistic_Vision_V5.1_noVAE/tree/main
 mkdir RV
 cd RV
 ln -s $PATH-TO-RV-5-1 rv-5-1
 cd ../
 
-# prepare dino v2
+# prepare dino v2 from https://huggingface.co/facebook/dinov2-large/tree/main
 mkdir DINO
 cd DINO
 ln -s $PATH-TO-DINOV2 dinov2
 cd ../
 
-# prepare motion module
+# prepare motion module from https://github.com/guoyww/AnimateDiff
 mkdir MM
 cd MM
 ln -s $PATH-TO-MM mm_v2.ckpt
 cd ../
 
 (Optional)
-# prepare sd-vae-ft-mse
+# prepare sd-vae-ft-mse from https://huggingface.co/stabilityai/sd-vae-ft-mse
 # link to a SD dir with a subfolder named 'sd-vae-ft-mse' 
 ```
 
