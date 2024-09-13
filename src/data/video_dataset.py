@@ -22,7 +22,7 @@ class VideoDataset(Dataset):
         root_dir, split,
         sample_size=(768, 576),
         clip_size=(320, 240),
-        scale=(0.9, 1.0),
+        scale=(1.0, 1.0),
         sample_stride=4,
         sample_n_frames=16,
         ref_mode="random",
