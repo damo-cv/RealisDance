@@ -21,7 +21,7 @@ class ImageDataset(Dataset):
     def __init__(
         self, split, data_lst_file_path_lst,
         sample_size=(768, 576), clip_size=(320, 240),
-        scale=(0.9, 1.0), version="v1", draw_face=False
+        scale=(1.0, 1.0), version="v1", draw_face=False
     ):
         super().__init__()
 
