@@ -1,0 +1,303 @@
+BLORP_FILES = \
+	blorp/blorp.c \
+	blorp/blorp.h \
+	blorp/blorp_blit.c \
+	blorp/blorp_clear.c \
+	blorp/blorp_nir_builder.h \
+	blorp/blorp_genX_exec.h \
+	blorp/blorp_priv.h
+
+COMMON_FILES = \
+	common/gen_clflush.h \
+	common/gen_batch_decoder.c \
+	common/gen_debug.c \
+	common/gen_debug.h \
+	common/gen_decoder.c \
+	common/gen_decoder.h \
+	common/gen_disasm.c \
+	common/gen_disasm.h \
+	common/gen_defines.h \
+	common/gen_gem.h \
+	common/gen_l3_config.c \
+	common/gen_l3_config.h \
+	common/gen_urb_config.c \
+	common/gen_sample_positions.h \
+	common/intel_log.c \
+	common/intel_log.h
+
+COMPILER_FILES = \
+	compiler/brw_cfg.cpp \
+	compiler/brw_cfg.h \
+	compiler/brw_clip.h \
+	compiler/brw_clip_line.c \
+	compiler/brw_clip_point.c \
+	compiler/brw_clip_tri.c \
+	compiler/brw_clip_unfilled.c \
+	compiler/brw_clip_util.c \
+	compiler/brw_compile_clip.c \
+	compiler/brw_compile_sf.c \
+	compiler/brw_compiler.c \
+	compiler/brw_compiler.h \
+	compiler/brw_dead_control_flow.cpp \
+	compiler/brw_dead_control_flow.h \
+	compiler/brw_disasm.c \
+	compiler/brw_disasm_info.c \
+	compiler/brw_disasm_info.h \
+	compiler/brw_eu.c \
+	compiler/brw_eu_compact.c \
+	compiler/brw_eu_defines.h \
+	compiler/brw_eu_emit.c \
+	compiler/brw_eu.h \
+	compiler/brw_eu_util.c \
+	compiler/brw_eu_validate.c \
+	compiler/brw_fs_builder.h \
+	compiler/brw_fs_bank_conflicts.cpp \
+	compiler/brw_fs_cmod_propagation.cpp \
+	compiler/brw_fs_combine_constants.cpp \
+	compiler/brw_fs_copy_propagation.cpp \
+	compiler/brw_fs.cpp \
+	compiler/brw_fs_cse.cpp \
+	compiler/brw_fs_dead_code_eliminate.cpp \
+	compiler/brw_fs_generator.cpp \
+	compiler/brw_fs.h \
+	compiler/brw_fs_live_variables.cpp \
+	compiler/brw_fs_live_variables.h \
+	compiler/brw_fs_lower_conversions.cpp \
+	compiler/brw_fs_lower_pack.cpp \
+	compiler/brw_fs_nir.cpp \
+	compiler/brw_fs_reg_allocate.cpp \
+	compiler/brw_fs_register_coalesce.cpp \
+	compiler/brw_fs_saturate_propagation.cpp \
+	compiler/brw_fs_sel_peephole.cpp \
+	compiler/brw_fs_surface_builder.cpp \
+	compiler/brw_fs_surface_builder.h \
+	compiler/brw_fs_validate.cpp \
+	compiler/brw_fs_visitor.cpp \
+	compiler/brw_inst.h \
+	compiler/brw_interpolation_map.c \
+	compiler/brw_ir_allocator.h \
+	compiler/brw_ir_fs.h \
+	compiler/brw_ir_vec4.h \
+	compiler/brw_nir.h \
+	compiler/brw_nir.c \
+	compiler/brw_nir_analyze_boolean_resolves.c \
+	compiler/brw_nir_analyze_ubo_ranges.c \
+	compiler/brw_nir_attribute_workarounds.c \
+	compiler/brw_nir_lower_cs_intrinsics.c \
+	compiler/brw_nir_lower_image_load_store.c \
+	compiler/brw_nir_opt_peephole_ffma.c \
+	compiler/brw_nir_tcs_workarounds.c \
+	compiler/brw_packed_float.c \
+	compiler/brw_predicated_break.cpp \
+	compiler/brw_reg.h \
+	compiler/brw_reg_type.c \
+	compiler/brw_reg_type.h \
+	compiler/brw_schedule_instructions.cpp \
+	compiler/brw_shader.cpp \
+	compiler/brw_shader.h \
+	compiler/brw_vec4_builder.h \
+	compiler/brw_vec4_cmod_propagation.cpp \
+	compiler/brw_vec4_copy_propagation.cpp \
+	compiler/brw_vec4.cpp \
+	compiler/brw_vec4_cse.cpp \
+	compiler/brw_vec4_dead_code_eliminate.cpp \
+	compiler/brw_vec4_generator.cpp \
+	compiler/brw_vec4_gs_visitor.cpp \
+	compiler/brw_vec4_gs_visitor.h \
+	compiler/brw_vec4.h \
+	compiler/brw_vec4_live_variables.cpp \
+	compiler/brw_vec4_live_variables.h \
+	compiler/brw_vec4_nir.cpp \
+	compiler/brw_vec4_gs_nir.cpp \
+	compiler/brw_vec4_reg_allocate.cpp \
+	compiler/brw_vec4_surface_builder.cpp \
+	compiler/brw_vec4_surface_builder.h \
+	compiler/brw_vec4_tcs.cpp \
+	compiler/brw_vec4_tcs.h \
+	compiler/brw_vec4_tes.cpp \
+	compiler/brw_vec4_tes.h \
+	compiler/brw_vec4_visitor.cpp \
+	compiler/brw_vec4_vs_visitor.cpp \
+	compiler/brw_vec4_vs.h \
+	compiler/brw_vue_map.c \
+	compiler/brw_wm_iz.cpp \
+	compiler/gen6_gs_visitor.cpp \
+	compiler/gen6_gs_visitor.h
+
+COMPILER_GENERATED_FILES = \
+	compiler/brw_nir_trig_workarounds.c
+
+DEV_FILES = \
+	dev/gen_device_info.c \
+	dev/gen_device_info.h
+
+GENXML_XML_FILES = \
+	genxml/gen4.xml \
+	genxml/gen45.xml \
+	genxml/gen5.xml \
+	genxml/gen6.xml \
+	genxml/gen7.xml \
+	genxml/gen75.xml \
+	genxml/gen8.xml \
+	genxml/gen9.xml \
+	genxml/gen10.xml \
+	genxml/gen11.xml
+
+GENXML_GENERATED_PACK_FILES = \
+	genxml/gen4_pack.h \
+	genxml/gen45_pack.h \
+	genxml/gen5_pack.h \
+	genxml/gen6_pack.h \
+	genxml/gen7_pack.h \
+	genxml/gen75_pack.h \
+	genxml/gen8_pack.h \
+	genxml/gen9_pack.h \
+	genxml/gen10_pack.h \
+	genxml/gen11_pack.h
+
+GENXML_GENERATED_FILES = \
+	$(GENXML_GENERATED_PACK_FILES) \
+	genxml/genX_bits.h \
+	genxml/genX_xml.h
+
+ISL_FILES = \
+	isl/isl.c \
+	isl/isl.h \
+	isl/isl_drm.c \
+	isl/isl_format.c \
+	isl/isl_genX_priv.h \
+	isl/isl_priv.h \
+	isl/isl_storage_image.c
+
+ISL_GEN4_FILES = \
+	isl/isl_gen4.c \
+	isl/isl_gen4.h \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN5_FILES = \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN6_FILES = \
+	isl/isl_gen6.c \
+	isl/isl_gen6.h \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN7_FILES = \
+	isl/isl_gen7.c \
+	isl/isl_gen7.h \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN75_FILES = \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN8_FILES = \
+	isl/isl_gen8.c \
+	isl/isl_gen8.h \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN9_FILES = \
+	isl/isl_gen9.c \
+	isl/isl_gen9.h \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN10_FILES = \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GEN11_FILES = \
+	isl/isl_emit_depth_stencil.c \
+	isl/isl_surface_state.c
+
+ISL_GENERATED_FILES = \
+	isl/isl_format_layout.c
+
+VULKAN_FILES := \
+	vulkan/anv_allocator.c \
+	vulkan/anv_batch_chain.c \
+	vulkan/anv_blorp.c \
+	vulkan/anv_cmd_buffer.c \
+	vulkan/anv_descriptor_set.c \
+	vulkan/anv_device.c \
+	vulkan/anv_dump.c \
+	vulkan/anv_formats.c \
+	vulkan/anv_genX.h \
+	vulkan/anv_image.c \
+	vulkan/anv_intel.c \
+	vulkan/anv_nir.h \
+	vulkan/anv_nir_add_base_work_group_id.c \
+	vulkan/anv_nir_apply_pipeline_layout.c \
+	vulkan/anv_nir_lower_input_attachments.c \
+	vulkan/anv_nir_lower_multiview.c \
+	vulkan/anv_nir_lower_push_constants.c \
+	vulkan/anv_nir_lower_ycbcr_textures.c \
+	vulkan/anv_pass.c \
+	vulkan/anv_pipeline.c \
+	vulkan/anv_pipeline_cache.c \
+	vulkan/anv_private.h \
+	vulkan/anv_queue.c \
+	vulkan/anv_util.c \
+	vulkan/anv_wsi.c \
+	vulkan/vk_format_info.h
+
+VULKAN_ANDROID_FILES := \
+	vulkan/anv_android.c
+
+VULKAN_WSI_WAYLAND_FILES := \
+	vulkan/anv_wsi_wayland.c
+
+VULKAN_WSI_X11_FILES := \
+	vulkan/anv_wsi_x11.c
+
+VULKAN_WSI_DISPLAY_FILES := \
+	vulkan/anv_wsi_display.c
+
+VULKAN_GEM_FILES := \
+	vulkan/anv_gem.c
+
+VULKAN_GEM_STUB_FILES := \
+	vulkan/anv_gem_stubs.c
+
+VULKAN_GENERATED_FILES := \
+	vulkan/anv_entrypoints.c \
+	vulkan/anv_entrypoints.h \
+	vulkan/anv_extensions.c \
+	vulkan/anv_extensions.h
+
+VULKAN_GENX_FILES := \
+	vulkan/genX_blorp_exec.c \
+	vulkan/genX_cmd_buffer.c \
+	vulkan/genX_gpu_memcpy.c \
+	vulkan/genX_pipeline.c \
+	vulkan/genX_query.c \
+	vulkan/genX_state.c
+
+VULKAN_GEN7_FILES := \
+	vulkan/gen7_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)
+
+VULKAN_GEN75_FILES := \
+	vulkan/gen7_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)
+
+VULKAN_GEN8_FILES := \
+	vulkan/gen8_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)
+
+VULKAN_GEN9_FILES := \
+	vulkan/gen8_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)
+
+VULKAN_GEN10_FILES := \
+	vulkan/gen8_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)
+
+VULKAN_GEN11_FILES := \
+	vulkan/gen8_cmd_buffer.c \
+	$(VULKAN_GENX_FILES)

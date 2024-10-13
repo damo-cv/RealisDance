@@ -1,0 +1,3 @@
+C_SOURCES := \
+   pl111_drm_public.h \
+   pl111_drm_winsys.c

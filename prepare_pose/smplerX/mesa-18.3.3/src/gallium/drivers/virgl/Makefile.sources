@@ -1,0 +1,18 @@
+C_SOURCES := \
+	virgl_buffer.c \
+	virgl_context.c \
+	virgl_context.h \
+	virgl_encode.c \
+	virgl_encode.h \
+	virgl_hw.h \
+	virgl_protocol.h \
+	virgl_public.h \
+	virgl_query.c \
+	virgl_resource.c \
+	virgl_resource.h \
+	virgl_screen.c \
+	virgl_screen.h \
+	virgl_streamout.c \
+	virgl_texture.c \
+	virgl_tgsi.c \
+	virgl_winsys.h
