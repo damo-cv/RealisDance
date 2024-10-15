@@ -16,12 +16,14 @@ After setting up the required environments, you can perform inference on the ori
 
 2. **HaMeR Inference:**
     ```bash
+    cd -
     source activate {YOUR_HaMeR_ENV}
     cd prepare_pose/hamer-main
     python inference_video.py --video_path {YOUR_VIDEO_PATH} --output_path {OUTPUT_PATH}
     ```
 3. **SMPLerX Inference:**
     ```bash
+    cd -
     source activate {YOUR_SMPLerX_ENV}
     cd prepare_pose/smplerX/main
     python inference_video.py --video_path {YOUR_VIDEO_PATH} --output_path {OUTPUT_PATH}
