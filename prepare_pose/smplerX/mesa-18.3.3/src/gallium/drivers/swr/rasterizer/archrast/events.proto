@@ -1,0 +1,358 @@
+# Copyright (C) 2016 Intel Corporation.   All Rights Reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice (including the next
+# paragraph) shall be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#
+# Provides definitions for events.
+
+enum AR_DRAW_TYPE
+{
+    Instanced = 0,
+    IndexedInstanced = 1,
+    InstancedSplit = 2,
+    IndexedInstancedSplit = 3
+};
+
+event ThreadStartApiEvent
+{
+};
+
+event ThreadStartWorkerEvent
+{
+};
+
+event DrawInfoEvent
+{
+    uint32_t drawId;
+    AR_DRAW_TYPE type;
+    uint32_t topology;
+    uint32_t numVertices;
+    uint32_t numIndices;
+    int32_t  indexOffset;
+    int32_t  baseVertex;
+    uint32_t numInstances;
+    uint32_t startInstance;
+    uint32_t tsEnable;
+    uint32_t gsEnable;
+    uint32_t soEnable;
+    uint32_t soTopology;
+    uint32_t splitId; // Split draw count or id.
+};
+
+event DispatchEvent
+{
+    uint32_t drawId;
+    uint32_t threadGroupCountX;
+    uint32_t threadGroupCountY;
+    uint32_t threadGroupCountZ;
+};
+
+event FrameEndEvent
+{
+    uint32_t frameId;
+    uint32_t nextDrawId;
+};
+
+///@brief API Stat: Synchonization event.
+event SwrSyncEvent
+{
+    uint32_t drawId;
+};
+
+///@brief API Stat: Invalidate hot tiles (i.e. tile cache)
+event SwrInvalidateTilesEvent
+{
+    uint32_t drawId;
+};
+
+///@brief API Stat: Invalidate and discard hot tiles within pixel region
+event SwrDiscardRectEvent
+{
+    uint32_t drawId;
+};
+
+///@brief API Stat: Flush tiles out to memory that is typically owned by driver (e.g. Flush RT cache)
+event SwrStoreTilesEvent
+{
+    uint32_t drawId;
+};
+
+event FrontendStatsEvent
+{
+    uint32_t drawId;
+    uint64_t IaVertices;
+    uint64_t IaPrimitives;
+    uint64_t VsInvocations;
+    uint64_t HsInvocations;
+    uint64_t DsInvocations;
+    uint64_t GsInvocations;
+    uint64_t GsPrimitives;
+    uint64_t CInvocations;
+    uint64_t CPrimitives;
+    uint64_t SoPrimStorageNeeded0;
+    uint64_t SoPrimStorageNeeded1;
+    uint64_t SoPrimStorageNeeded2;
+    uint64_t SoPrimStorageNeeded3;
+    uint64_t SoNumPrimsWritten0;
+    uint64_t SoNumPrimsWritten1;
+    uint64_t SoNumPrimsWritten2;
+    uint64_t SoNumPrimsWritten3;
+};
+
+event BackendStatsEvent
+{
+    uint32_t drawId;
+    uint64_t DepthPassCount;
+    uint64_t PsInvocations;
+    uint64_t CsInvocations;
+
+};
+
+event EarlyZSingleSample
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};	
+
+event LateZSingleSample
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyStencilSingleSample
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event LateStencilSingleSample
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyZSampleRate
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};	
+
+event LateZSampleRate
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyStencilSampleRate
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event LateStencilSampleRate
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+// Total Early-Z counts, SingleSample and SampleRate
+event EarlyZ
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};	
+
+// Total LateZ counts, SingleSample and SampleRate
+event LateZ
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+// Total EarlyStencil counts, SingleSample and SampleRate
+event EarlyStencil
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+// Total LateStencil counts, SingleSample and SampleRate
+event LateStencil
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyZNullPS
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyStencilNullPS
+{
+    uint32_t drawId; 
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyZPixelRate
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event LateZPixelRate
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+
+event EarlyOmZ
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event EarlyOmStencil
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event LateOmZ
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event LateOmStencil
+{
+    uint32_t drawId;
+    uint64_t passCount;
+    uint64_t failCount;
+};
+
+event GSInputPrims
+{
+    uint32_t drawId;
+    uint64_t inputPrimCount;
+};
+
+event GSPrimsGen
+{
+    uint32_t drawId;
+    uint64_t primGeneratedCount;
+};
+
+event GSVertsInput
+{
+    uint32_t drawId;
+    uint64_t vertsInput;
+};
+
+event TessPrims
+{
+    uint32_t drawId;
+    uint64_t primCount;
+};
+
+event RasterTiles
+{
+    uint32_t drawId;
+    uint32_t rastTileCount;
+};
+
+event ClipperEvent
+{
+    uint32_t drawId;
+    uint32_t trivialRejectCount;
+    uint32_t trivialAcceptCount;
+    uint32_t mustClipCount;
+};
+
+event CullEvent
+{
+    uint32_t drawId;
+    uint64_t backfacePrimCount;
+    uint64_t degeneratePrimCount;
+};
+
+event AlphaEvent
+{
+    uint32_t drawId;
+    uint32_t alphaTestCount;
+    uint32_t alphaBlendCount;
+};
+
+event VSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};
+
+event HSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};
+
+event DSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};
+
+event GSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};
+
+event PSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};
+
+event CSInfo
+{
+    uint32_t drawId;
+    uint32_t numInstExecuted;
+};

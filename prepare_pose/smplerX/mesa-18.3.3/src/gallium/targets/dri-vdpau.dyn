@@ -1,0 +1,5 @@
+{
+	nouveau_drm_screen_create;
+	radeon_drm_winsys_create;
+	amdgpu_winsys_create;
+};

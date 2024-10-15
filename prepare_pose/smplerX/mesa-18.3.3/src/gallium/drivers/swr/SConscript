@@ -1,0 +1,280 @@
+Import('*')
+
+from sys import executable as python_cmd
+import os.path
+import distutils.version
+
+if not env['swr']:
+    Return()
+
+if not env['llvm']:
+    print('warning: LLVM disabled: not building swr')
+    env['swr'] = False
+    Return()
+
+if env['LLVM_VERSION'] < distutils.version.LooseVersion('6.0'):
+    print("warning: swr requires LLVM >= 6.0: not building swr")
+    env['swr'] = False
+    Return()
+
+env.MSVC2013Compat()
+
+env = env.Clone()
+
+# construct llvm include dir
+if env['platform'] == 'windows':
+    # on windows there is no llvm-config, so LLVM is defined
+    llvm_includedir = os.path.join(os.environ['LLVM'], 'include')
+else:
+    llvm_config = os.environ.get('LLVM_CONFIG', 'llvm-config')
+    llvm_includedir = env.backtick('%s --includedir' % llvm_config).rstrip()
+    print("llvm include dir %s" % llvm_includedir)
+
+if not env['msvc'] :
+    env.Append(CCFLAGS = [
+        '-std=c++11',
+    ])
+
+swrroot = '#src/gallium/drivers/swr/'
+srcroot = Dir(swrroot).abspath
+bldroot = Dir('.').abspath
+
+env.CodeGenerate(
+    target = 'rasterizer/codegen/gen_knobs.cpp',
+    script = swrroot + 'rasterizer/codegen/gen_knobs.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --output $TARGET --gen_cpp'
+)
+Depends('rasterizer/codegen/gen_knobs.cpp',
+        swrroot + 'rasterizer/codegen/templates/gen_knobs.cpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/codegen/gen_knobs.h',
+    script = swrroot + 'rasterizer/codegen/gen_knobs.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --output $TARGET --gen_h'
+)
+Depends('rasterizer/codegen/gen_knobs.h',
+        swrroot + 'rasterizer/codegen/templates/gen_knobs.h')
+
+env.CodeGenerate(
+    target = 'rasterizer/jitter/gen_state_llvm.h',
+    script = swrroot + 'rasterizer/codegen/gen_llvm_types.py',
+    source = 'rasterizer/core/state.h',
+    command = python_cmd + ' $SCRIPT --input $SOURCE --output $TARGET'
+)
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_llvm.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/jitter/gen_builder.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_llvm_ir_macros.py',
+    source = os.path.join(llvm_includedir, 'llvm/IR/IRBuilder.h'),
+    command = python_cmd + ' $SCRIPT --input $SOURCE --output ' + bldroot + '/rasterizer/jitter --gen_h'
+)
+Depends('rasterizer/jitter/gen_builder.hpp',
+        swrroot + 'rasterizer/codegen/templates/gen_builder.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/jitter/gen_builder_meta.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_llvm_ir_macros.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --output ' + bldroot + '/rasterizer/jitter --gen_meta_h'
+)
+Depends('rasterizer/jitter/gen_builder.hpp',
+        swrroot + 'rasterizer/codegen/templates/gen_builder.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/jitter/gen_builder_intrin.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_llvm_ir_macros.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --output ' + bldroot + '/rasterizer/jitter --gen_intrin_h'
+)
+Depends('rasterizer/jitter/gen_builder.hpp',
+        swrroot + 'rasterizer/codegen/templates/gen_builder.hpp')
+
+env.CodeGenerate(
+    target = './gen_swr_context_llvm.h',
+    script = swrroot + 'rasterizer/codegen/gen_llvm_types.py',
+    source = 'swr_context.h',
+    command = python_cmd + ' $SCRIPT --input $SOURCE --output $TARGET'
+)
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_llvm.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/archrast/gen_ar_event.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_archrast.py',
+    source = 'rasterizer/archrast/events.proto',
+    command = python_cmd + ' $SCRIPT --proto $SOURCE --proto_private ' + srcroot + '/rasterizer/archrast/events_private.proto --output $TARGET --gen_event_hpp'
+)
+Depends('rasterizer/archrast/gen_ar_event.hpp',
+        swrroot + 'rasterizer/archrast/events_private.proto')
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_ar_event.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/archrast/gen_ar_event.cpp',
+    script = swrroot + 'rasterizer/codegen/gen_archrast.py',
+    source = 'rasterizer/archrast/events.proto',
+    command = python_cmd + ' $SCRIPT --proto $SOURCE --proto_private ' + srcroot + '/rasterizer/archrast/events_private.proto --output $TARGET --gen_event_cpp'
+)
+Depends('rasterizer/archrast/gen_ar_event.cpp',
+        swrroot + 'rasterizer/archrast/events_private.proto')
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_ar_event.cpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/archrast/gen_ar_eventhandler.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_archrast.py',
+    source = 'rasterizer/archrast/events.proto',
+    command = python_cmd + ' $SCRIPT --proto $SOURCE --proto_private ' + srcroot + '/rasterizer/archrast/events_private.proto --output $TARGET --gen_eventhandler_hpp'
+)
+Depends('rasterizer/archrast/gen_ar_eventhandler.hpp',
+        swrroot + 'rasterizer/archrast/events_private.proto')
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_ar_eventhandler.hpp')
+
+env.CodeGenerate(
+    target = 'rasterizer/archrast/gen_ar_eventhandlerfile.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_archrast.py',
+    source = 'rasterizer/archrast/events.proto',
+    command = python_cmd + ' $SCRIPT --proto $SOURCE --proto_private ' + srcroot + '/rasterizer/archrast/events_private.proto --output $TARGET --gen_eventhandlerfile_hpp'
+)
+Depends('rasterizer/archrast/gen_ar_eventhandlerfile.hpp',
+        swrroot + 'rasterizer/archrast/events_private.proto')
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_ar_eventhandlerfile.hpp')
+
+# 5 SWR_MULTISAMPLE_TYPE_COUNT
+# 2 SWR_MSAA_SAMPLE_PATTERN_COUNT
+# 3 SWR_INPUT_COVERAGE_COUNT
+# 2 centroid
+# 2 forcedSampleCount
+# 2 canEarlyZ
+backendPixelRateFileCount = 4
+backendPixelRateFilePat = "rasterizer/core/backends/gen_BackendPixelRate%s.cpp"
+backendPixelRateFiles = list(backendPixelRateFilePat % x for x in range(0, backendPixelRateFileCount))
+env.CodeGenerate(
+    target = 'rasterizer/core/backends/gen_BackendPixelRate.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_backends.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --outdir ' + bldroot + '/rasterizer/core/backends --dim 5 2 3 2 2 2 --numfiles ' + str(backendPixelRateFileCount) + ' --cpp --hpp'
+    )
+Depends(backendPixelRateFiles,
+        ['rasterizer/core/backends/gen_BackendPixelRate.hpp',
+         'rasterizer/archrast/gen_ar_event.hpp',
+         'rasterizer/archrast/gen_ar_eventhandler.hpp',
+         'rasterizer/codegen/gen_knobs.h']
+        )
+
+# 5 SWR_MULTISAMPLE_TYPE_COUNT
+# 2 CenterPattern
+# 2 Conservative
+# 3 SWR_INPUT_COVERAGE_COUNT
+# 5 STATE_VALID_TRI_EDGE_COUNT
+# 2 RasterScissorEdges
+genRasterizerFileCount = 4
+genRasterizerFilePat = "rasterizer/core/backends/gen_rasterizer%s.cpp"
+genRasterizerFiles = list(genRasterizerFilePat % x for x in range(0, genRasterizerFileCount))
+env.CodeGenerate(
+    target = 'rasterizer/core/backends/gen_rasterizer.hpp',
+    script = swrroot + 'rasterizer/codegen/gen_backends.py',
+    source = '',
+    command = python_cmd + ' $SCRIPT --outdir ' + bldroot + '/rasterizer/core/backends --rast --dim 5 2 2 3 5 2 --numfiles ' + str(genRasterizerFileCount) + ' --cpp --hpp'
+    )
+Depends(genRasterizerFiles,
+        ['rasterizer/core/backends/gen_rasterizer.hpp',
+         'rasterizer/archrast/gen_ar_event.hpp',
+         'rasterizer/archrast/gen_ar_eventhandler.hpp',
+         'rasterizer/codegen/gen_knobs.h']
+        )
+
+Depends('rasterizer/jitter/gen_state_llvm.h',
+        swrroot + 'rasterizer/codegen/templates/gen_backend.cpp')
+
+# Auto-generated .cpp files (that need to generate object files)
+built_sources = [
+    'rasterizer/codegen/gen_knobs.cpp',
+    'rasterizer/archrast/gen_ar_event.cpp',
+    ]
+
+built_sources += [backendPixelRateFiles, genRasterizerFiles]
+
+source = built_sources
+source += env.ParseSourceList(swrroot + 'Makefile.sources', [
+    'ARCHRAST_CXX_SOURCES',
+    'COMMON_CXX_SOURCES',
+    'CORE_CXX_SOURCES',
+    'MEMORY_CXX_SOURCES'
+])
+
+env.Prepend(CPPPATH = [
+    '.',
+    'rasterizer',
+    'rasterizer/codegen',
+    'rasterizer/core',
+    'rasterizer/jitter',
+    'rasterizer/archrast',
+    ])
+
+# AVX lib
+envavx = env.Clone()
+
+envavx.Append(CPPDEFINES = ['KNOB_ARCH=KNOB_ARCH_AVX'])
+if env['platform'] == 'windows':
+    envavx.Append(CCFLAGS = ['/arch:AVX'])
+else:
+    envavx.Append(CCFLAGS = ['-mavx'])
+
+swrAVX = envavx.SharedLibrary(
+    target = 'swrAVX',
+    source = source,
+    OBJPREFIX = 'avx_'
+    )
+env.Alias('swrAVX', swrAVX)
+
+# AVX2 lib
+envavx2 = env.Clone()
+
+envavx2.Append(CPPDEFINES = ['KNOB_ARCH=KNOB_ARCH_AVX2'])
+if env['platform'] == 'windows':
+    envavx2.Append(CCFLAGS = ['/arch:AVX2'])
+else:
+    envavx2.Append(CCFLAGS = ['-mavx2', '-mfma', '-mbmi2', '-mf16c'])
+
+swrAVX2 = envavx2.SharedLibrary(
+    target = 'swrAVX2',
+    source = source,
+    OBJPREFIX = 'avx2_'
+    )
+env.Alias('swrAVX2', swrAVX2)
+
+source = env.ParseSourceList(swrroot + 'Makefile.sources', [
+    'CXX_SOURCES',
+    'COMMON_CXX_SOURCES',
+    'JITTER_CXX_SOURCES',
+    'LOADER_SOURCES'
+])
+source += [
+    'rasterizer/codegen/gen_knobs.cpp',
+    'rasterizer/archrast/gen_ar_event.cpp',
+    ]
+
+# main SWR lib
+envSWR = envavx.Clone() # pick up the arch flag for intrinsic usage
+envSWR.Append(CPPDEFINES = ['HAVE_SWR_AVX', 'HAVE_SWR_AVX2'])
+swr = envSWR.ConvenienceLibrary(
+    target = 'swr',
+    source = source,
+    )
+
+# treat arch libs as dependencies, even though they are not linked
+# into swr, so we don't have to build them separately
+Depends(swr, ['swrAVX', 'swrAVX2'])
+
+env.Alias('swr', swr)
+
+env.Prepend(LIBS = [swr])
+
+Export('swr')

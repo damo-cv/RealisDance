@@ -1,0 +1,9 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: windowsdriproto
+Description: Windows-DRI extension headers
+Version: 1.0.0
+Cflags: -I${includedir}

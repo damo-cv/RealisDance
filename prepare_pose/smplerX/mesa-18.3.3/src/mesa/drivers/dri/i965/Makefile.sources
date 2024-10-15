@@ -1,0 +1,184 @@
+i965_FILES = \
+	brw_binding_tables.c \
+	brw_blorp.c \
+	brw_blorp.h \
+	brw_bufmgr.c \
+	brw_bufmgr.h \
+	brw_clear.c \
+	brw_clip.c \
+	brw_compute.c \
+	brw_conditional_render.c \
+	brw_context.c \
+	brw_context.h \
+	brw_cs.c \
+	brw_cs.h \
+	brw_curbe.c \
+	brw_defines.h \
+	brw_disk_cache.c \
+	brw_draw.c \
+	brw_draw.h \
+	brw_draw_upload.c \
+	brw_ff_gs.c \
+	brw_ff_gs_emit.c \
+	brw_ff_gs.h \
+	brw_formatquery.c \
+	brw_generate_mipmap.c \
+	brw_gs.c \
+	brw_gs.h \
+	brw_gs_surface_state.c \
+	brw_link.cpp \
+	brw_meta_util.c \
+	brw_meta_util.h \
+	brw_misc_state.c \
+	brw_multisample_state.h \
+	brw_nir_uniforms.cpp \
+	brw_object_purgeable.c \
+	brw_pipe_control.c \
+	brw_pipe_control.h \
+	brw_performance_query.h \
+	brw_performance_query.c \
+	brw_performance_query_mdapi.c \
+	brw_performance_query_metrics.h \
+	brw_program.c \
+	brw_program.h \
+	brw_program_binary.c \
+	brw_program_cache.c \
+	brw_primitive_restart.c \
+	brw_queryobj.c \
+	brw_reset.c \
+	brw_sf.c \
+	brw_state.h \
+	brw_state_upload.c \
+	brw_structs.h \
+	brw_surface_formats.c \
+	brw_sync.c \
+	brw_tcs.c \
+	brw_tcs_surface_state.c \
+	brw_tes.c \
+	brw_tes_surface_state.c \
+	brw_urb.c \
+	brw_util.c \
+	brw_util.h \
+	brw_vs.c \
+	brw_vs.h \
+	brw_vs_surface_state.c \
+	brw_wm.c \
+	brw_wm.h \
+	brw_wm_surface_state.c \
+	gen4_blorp_exec.h \
+	gen6_clip_state.c \
+	gen6_constant_state.c \
+	gen6_multisample_state.c \
+	gen6_queryobj.c \
+	gen6_sampler_state.c \
+	gen6_sol.c \
+	gen6_urb.c \
+	gen7_l3_state.c \
+	gen7_sol_state.c \
+	gen7_urb.c \
+	gen8_depth_state.c \
+	gen8_multisample_state.c \
+	hsw_queryobj.c \
+	hsw_sol.c \
+	intel_batchbuffer.c \
+	intel_batchbuffer.h \
+	intel_blit.c \
+	intel_blit.h \
+	intel_buffer_objects.c \
+	intel_buffer_objects.h \
+	intel_buffers.c \
+	intel_buffers.h \
+	intel_copy_image.c \
+	intel_extensions.c \
+	intel_fbo.c \
+	intel_fbo.h \
+	intel_image.h \
+	intel_mipmap_tree.c \
+	intel_mipmap_tree.h \
+	intel_pixel_bitmap.c \
+	intel_pixel.c \
+	intel_pixel_copy.c \
+	intel_pixel_draw.c \
+	intel_pixel.h \
+	intel_pixel_read.c \
+	intel_screen.c \
+	intel_screen.h \
+	intel_state.c \
+	intel_tex.c \
+	intel_tex_copy.c \
+	intel_tex.h \
+	intel_tex_image.c \
+	intel_tex_obj.h \
+	intel_tex_validate.c \
+	intel_upload.c \
+	libdrm_macros.h
+
+intel_tiled_memcpy_FILES = \
+	intel_tiled_memcpy_normal.c \
+	intel_tiled_memcpy.h
+
+intel_tiled_memcpy_sse41_FILES = \
+	intel_tiled_memcpy_sse41.c \
+	intel_tiled_memcpy_sse41.h
+
+intel_tiled_memcpy_dep_FILES = \
+	intel_tiled_memcpy.c
+
+i965_gen4_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen45_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen5_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen6_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen7_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen75_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen8_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen9_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen10_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_gen11_FILES = \
+	genX_blorp_exec.c \
+	genX_state_upload.c
+
+i965_oa_GENERATED_FILES = \
+	brw_oa_metrics.c \
+	brw_oa_metrics.h
+
+i965_oa_xml_FILES = \
+	brw_oa_hsw.xml \
+	brw_oa_bdw.xml \
+	brw_oa_chv.xml \
+	brw_oa_sklgt2.xml \
+	brw_oa_sklgt3.xml \
+	brw_oa_sklgt4.xml \
+	brw_oa_bxt.xml \
+	brw_oa_kblgt2.xml \
+	brw_oa_kblgt3.xml \
+	brw_oa_glk.xml \
+	brw_oa_cflgt2.xml \
+	brw_oa_cflgt3.xml \
+	brw_oa_cnl.xml

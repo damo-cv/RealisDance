@@ -1,0 +1,4 @@
+#!/bin/bash
+# -*- mode: sh -*-
+
+LD_PRELOAD="@install_libexecdir@/libintel_sanitize_gpu.so${LD_PRELOAD:+:$LD_PRELOAD}" exec "$@"

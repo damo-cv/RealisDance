@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Compilation and Installation using Meson</title>
+  <link rel="stylesheet" type="text/css" href="mesa.css">
+</head>
+<body>
+
+<div class="header">
+  <h1>The Mesa 3D Graphics Library</h1>
+</div>
+
+<iframe src="contents.html"></iframe>
+<div class="content">
+
+<h1>Compilation and Installation using Meson</h1>
+
+<h2 id="basic">1. Basic Usage</h2>
+
+<p><strong>The Meson build system is generally considered stable and ready
+for production</strong></p>
+
+<p>The meson build is tested on Linux, macOS, Cygwin and Haiku, FreeBSD,
+DragonflyBSD, NetBSD, and should work on OpenBSD.</p>
+
+<p><strong>Mesa requires Meson >= 0.45.0 to build.</strong>
+
+Some older versions of meson do not check that they are too old and will error
+out in odd ways.
+</p>
+
+<p>
+The meson program is used to configure the source directory and generates
+either a ninja build file or Visual Studio® build files. The latter must
+be enabled via the <code>--backend</code> switch, as ninja is the default backend on all
+operating systems. Meson only supports out-of-tree builds, and must be passed a
+directory to put built and generated sources into. We'll call that directory
+"build" for examples.
+</p>
+
+<pre>
+    meson build/
+</pre>
+
+<p>
+To see a description of your options you can run <code>meson configure</code>
+along with a build directory to view the selected options for. This will show
+your meson global arguments and project arguments, along with their defaults
+and your local settings.
+
+Meson does not currently support listing options before configure a build
+directory, but this feature is being discussed upstream.
+</p>
+
+<pre>
+    meson configure build/
+</pre>
+
+<p>
+With additional arguments <code>meson configure</code> is used to change
+options on already configured build directory. All options passed to this
+command are in the form <code>-D "command"="value"</code>.
+</p>
+
+<pre>
+    meson configure build/ -Dprefix=/tmp/install -Dglx=true
+</pre>
+
+<p>
+Note that options taking lists (such as <code>platforms</code>) are
+<a href="http://mesonbuild.com/Build-options.html#using-build-options">a bit
+more complicated</a>, but the simplest form compatible with Mesa options
+is to use a comma to separate values (<code>-D platforms=drm,wayland</code>)
+and brackets to represent an empty list (<code>-D platforms=[]</code>).
+</p>
+
+<p>
+Once you've run the initial <code>meson</code> command successfully you can use
+your configured backend to build the project. With ninja, the -C option can be
+be used to point at a directory to build.
+</p>
+
+<pre>
+    ninja -C build/
+</pre>
+
+<p>
+Without arguments, it will produce libGL.so and/or several other libraries
+depending on the options you have chosen. Later, if you want to rebuild for a
+different configuration, you should run <code>ninja clean</code> before
+changing the configuration, or create a new out of tree build directory for
+each configuration you want to build
+<a href="http://mesonbuild.com/Using-multiple-build-directories.html">as
+recommended in the documentation</a>
+</p>
+
+<p>
+Autotools automatically updates translation files as part of the build process,
+meson does not do this. Instead if you want translated drirc files you will need 
+to invoke non-default targets for ninja to update them:
+<code>ninja -C build/ xmlpool-pot xmlpool-update-po xmlpool-gmo</code>
+</p>
+
+<dl>
+<dt><code>Environment Variables</code></dt>
+<dd><p>Meson supports the standard CC and CXX environment variables for
+changing the default compiler, and CFLAGS, CXXFLAGS, and LDFLAGS for setting
+options to the compiler and linker during the initial configuration.
+
+These arguments are consumed and stored by meson when it is initialized. To
+change these flags after the build is initialized (or when doing a first
+initialization), consider using <code>-D${lang}_args</code> and
+<code>-D${lang}_link_args</code> instead. Meson will never change compiler in a
+configured build directory.
+</p>
+
+<pre>
+    CC=clang CXX=clang++ meson build-clang
+    ninja -C build-clang
+    ninja -C build-clang clean
+    meson configure build -Dc_args="-Wno-typedef-redefinition"
+    ninja -C build-clang
+</pre>
+
+<p>
+The default compilers depends on your operating system. Meson supports most of
+the popular compilers, a complete list is available
+<a href="http://mesonbuild.com/Reference-tables.html#compiler-ids">here</a>.
+</p>
+
+<p>Meson also honors <code>DESTDIR</code> for installs</p>
+</dd>
+
+
+<dt><code>LLVM</code></dt>
+<dd><p>Meson includes upstream logic to wrap llvm-config using its standard
+dependency interface. It will search <code>$PATH</code> (or <code>%PATH%</code> on windows) for
+llvm-config (and llvm-config$version and llvm-config-$version), so using an
+LLVM from a non-standard path is as easy as
+<code>PATH=/path/with/llvm-config:$PATH meson build</code>.
+</p></dd>
+</dl>
+
+<dl>
+<dt><code>PKG_CONFIG_PATH</code></dt>
+<dd><p>The
+<code>pkg-config</code> utility is a hard requirement for configuring and
+building Mesa on Unix-like systems. It is used to search for external libraries
+on the system. This environment variable is used to control the search path for
+<code>pkg-config</code>. For instance, setting
+<code>PKG_CONFIG_PATH=/usr/X11R6/lib/pkgconfig</code> will search for package
+metadata in <code>/usr/X11R6</code> before the standard directories.</p>
+</dd>
+</dl>
+
+<p>
+One of the oddities of meson is that some options are different when passed to
+the <code>meson</code> than to <code>meson configure</code>. These options are
+passed as --option=foo to <code>meson</code>, but -Doption=foo to <code>meson
+configure</code>. Mesa defined options are always passed as -Doption=foo.
+</p>
+
+<p>For those coming from autotools be aware of the following:</p>
+
+<dl>
+<dt><code>--buildtype/-Dbuildtype</code></dt>
+<dd><p>This option will set the compiler debug/optimisation levels to aid
+debugging the Mesa libraries.</p>
+
+<p>Note that in meson this defaults to <code>debugoptimized</code>, and
+not setting it to <code>release</code> will yield non-optimal
+performance and binary size. Not using <code>debug</code> may interfere
+with debugging as some code and validation will be optimized away.
+</p>
+
+<p> For those wishing to pass their own optimization flags, use the <code>plain</code>
+buildtype, which causes meson to inject no additional compiler arguments, only
+those in the C/CXXFLAGS and those that mesa itself defines.</p>
+</dd>
+</dl>
+
+<dl>
+<dt><code>-Db_ndebug</code></dt>
+<dd><p>This option controls assertions in meson projects. When set to <code>false</code>
+(the default) assertions are enabled, when set to true they are disabled. This
+is unrelated to the <code>buildtype</code>; setting the latter to
+<code>release</code> will not turn off assertions.
+</p>
+</dd>
+</dl>
+
+</div>
+</body>
+</html>

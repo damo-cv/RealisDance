@@ -1,0 +1,37 @@
+#######################################################################
+# SConscript for EGL
+
+
+Import('*')
+
+env = env.Clone()
+
+env.Append(CPPPATH = [
+    '#/include',
+    '#/include/drm-uapi',
+    '#/include/HaikuGL',
+    '#/src/egl/main',
+    '#/src',
+])
+
+
+# parse Makefile.sources
+egl_sources = env.ParseSourceList('Makefile.sources', 'LIBEGL_C_FILES')
+
+env.Append(CPPDEFINES = [
+    '_EGL_NATIVE_PLATFORM=_EGL_PLATFORM_HAIKU',
+    '_EGL_BUILT_IN_DRIVER_HAIKU',
+    'HAVE_HAIKU_PLATFORM',
+])
+egl_sources.append('drivers/haiku/egl_haiku.cpp')
+
+env.Prepend(LIBS = [mesautil])
+
+egl = env.SharedLibrary(
+    target = 'EGL',
+    source = egl_sources,
+)
+
+egl = env.InstallSharedLibrary(egl, version=(1, 0, 0))
+
+env.Alias('egl', egl)

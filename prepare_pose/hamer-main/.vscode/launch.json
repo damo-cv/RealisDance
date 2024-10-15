@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--img_folder", "/mnt/workspace/workgroup/wangbenzhi.wbz/data/Academy/methods-exp/val_moreAA_ubc/local_hand/origin/tmp",
+                "--out_folder",  "/mnt/workspace/workgroup/wangbenzhi.wbz/data/Academy/methods-exp/val_moreAA_ubc/local_hand/origin/images_json",
+                // "--batch_size=48",
+                "--total_gpu_number","8",
+                "--idx","0",
+                "--full_frame"
+
+            ]
+        }
+    ]
+}
