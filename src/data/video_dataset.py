@@ -27,7 +27,7 @@ class VideoDataset(Dataset):
         sample_n_frames=16,
         ref_mode="random",
         image_finetune=False,
-        start_pixel=-1,
+        start_index=-1,
         draw_face=False,
         fix_gap=False,
     ):
@@ -48,7 +48,7 @@ class VideoDataset(Dataset):
             f"the ref_mode could only be \"first\" or \"random\". However \"ref_mode = {ref_mode}\" is given."
         self.ref_mode = ref_mode
         self.image_finetune = image_finetune
-        self.start_pixel = start_pixel
+        self.start_index = start_index
         self.draw_face = draw_face
         self.fix_gap = fix_gap
 
@@ -114,13 +114,13 @@ class VideoDataset(Dataset):
                 clip_length = self.at_least_n_frames
                 start_idx = random.randint(
                     0, video_length - clip_length
-                ) if self.start_pixel < 0 else max(min(self.start_pixel, video_length - clip_length), 0)
+                ) if self.start_index < 0 else max(min(self.start_index, video_length - clip_length), 0)
                 image_index = list(range(start_idx, clip_length + start_idx, self.sample_stride))
             else:
                 clip_length = min(video_length, self.at_least_n_frames)
                 start_idx = random.randint(
                     0, video_length - clip_length
-                ) if self.start_pixel < 0 else max(min(self.start_pixel, video_length - clip_length), 0)
+                ) if self.start_index < 0 else max(min(self.start_index, video_length - clip_length), 0)
                 image_index = list(
                     np.linspace(start_idx, start_idx + clip_length - 1, self.sample_n_frames, dtype=int))
             batch_index = ref_index + image_index
