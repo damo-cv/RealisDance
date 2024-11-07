@@ -136,6 +136,7 @@ def main():
             if args.show_bbox:
                 vis_img = cv2.rectangle(vis_img, start_point, end_point, (255, 0, 0), 2)
 
+        vis_img = vis_img.astype(np.uint8)
         output_video.write(vis_img[:, :, ::-1])
 
     video_capture.release()
