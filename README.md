@@ -103,7 +103,7 @@ Note that the dataset returns a Dict like this:
     "ref_image_clip": reference_dino_image,
 }
 ```
-
+You can generate your `DWPose`, `HaMeR`, or `SMPLerX` data by following the instructions in the [Prepare Pose README](prepare_pose/README.md).
 
 ### 5. Train Your RealisDance
 

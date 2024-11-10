@@ -259,7 +259,7 @@ def render_mesh_kugang(img, mesh, face, cam_param, mesh_as_vertices=False):
         np.radians(180), [1, 0, 0])
         mesh.apply_transform(rot)
         
-        vertex_colors = torch.load('common/utils/smplx_color.pt') / 255.
+        vertex_colors = torch.load('../render_color_weight/smplx_color.pt') / 255.
         mesh.visual.vertex_colors = vertex_colors
         mesh = pyrender.Mesh.from_trimesh(mesh, smooth=False)
 
