@@ -6,7 +6,6 @@ import numpy as np
 import torchvision.transforms as transforms
 import torch.backends.cudnn as cudnn
 import torch
-os.chdir('/mnt/workspace/wangbenzhi/SMPLer-X/main')
 sys.path.insert(0, osp.join('..', 'main'))
 sys.path.insert(0, osp.join('..', 'data'))
 sys.path.insert(0, osp.join('..', 'common'))
@@ -135,7 +134,7 @@ def main():
 
             if args.show_bbox:
                 vis_img = cv2.rectangle(vis_img, start_point, end_point, (255, 0, 0), 2)
-
+        vis_img = vis_img.astype('uint8')
         output_video.write(vis_img[:, :, ::-1])
 
     video_capture.release()

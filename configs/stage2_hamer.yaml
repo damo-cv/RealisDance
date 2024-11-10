@@ -4,7 +4,6 @@ output_dir: "outputs"
 pretrained_model_path: "pretrained_models/RV/rv-5-1"
 pretrained_clip_path: "pretrained_models/DINO/dinov2"
 pretrained_mm_path: "pretrained_models/MM/mm_v2.ckpt"
-pretrained_vae_path: "pretrained_models/StableDiffusion/sd-1-5"
 
 unet_additional_kwargs:
   use_motion_module              : True
@@ -67,7 +66,7 @@ validation_data:
     image_finetune: False
     ref_mode: "first"
     sample_n_frames: 16
-    start_pixel: 0
+    start_index: 0
     fix_gap: True
 
 trainable_modules:

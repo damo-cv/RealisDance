@@ -75,7 +75,7 @@ def main(
 
     train_data: Dict,
     train_cfg: bool = True,
-    cfg_uncond_ratio: float = 0.1,
+    cfg_uncond_ratio: float = 0.05,
     pose_shuffle_ratio: float = 0.0,
 
     pretrained_vae_path: str = "",

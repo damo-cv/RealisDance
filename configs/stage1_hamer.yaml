@@ -3,7 +3,6 @@ image_finetune: True
 output_dir: "outputs"
 pretrained_model_path: "pretrained_models/RV/rv-5-1"
 pretrained_clip_path: "pretrained_models/DINO/dinov2"
-pretrained_vae_path: "pretrained_models/StableDiffusion/sd-1-5"
 
 pose_guider_kwargs:
   pose_guider_type:     "side_guider"
