@@ -109,7 +109,7 @@ class PoseGuider(nn.Module):
         self.gate_module = GateModule(channels=backbone_channels[-1], num_conds=num_conds)
 
         self.blocks_0 = nn.Sequential(
-            nn.Conv2d(backbone_channels[-1]*3, out_channels[0], kernel_size=(1, 1)),
+            nn.Conv2d(backbone_channels[-1]*self.num_conds, out_channels[0], kernel_size=(1, 1)),
             nn.SiLU()
         )
         self.block_0_out_proj = zero_module(nn.Conv2d(out_channels[0], out_channels[0], kernel_size=(1, 1)))
