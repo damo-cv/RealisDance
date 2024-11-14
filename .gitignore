@@ -1,7 +1,6 @@
 inputs
 outputs
 log
-datasets
 *.pyc
 pretrained_models/
 *__pycache__
