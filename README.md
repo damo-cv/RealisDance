@@ -9,7 +9,7 @@ The architecture of RealisDance is shown as follows:
 <img src="__assets__/figs/arch.png" style="width: 75%">
 
 ## News
-- **2025-04-24: RealisDance-DiT will be released later.**
+- **2025-04-24: RealisDance-DiT will be released in the next three weeks!!!**
 - **2024-10-15**: Released the code for pose preparation.
 - **2024-09-10**: Now you can try more interesting AI video editing in [XunGuang](https://xunguang.damo-vision.com/) !!!
 - **2024-09-09**: You may also be interested in our human part repair method [RealisHuman](https://github.com/Wangbenzhi/RealisHuman).
