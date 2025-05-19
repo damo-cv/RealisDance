@@ -1,7 +1,0 @@
-{
-	global:
-		gl*;
-		mgl*;
-	local:
-		*;
-};

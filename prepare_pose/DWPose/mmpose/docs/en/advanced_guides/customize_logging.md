@@ -1,3 +1,0 @@
-# Customize Logging
-
-Coming soon.

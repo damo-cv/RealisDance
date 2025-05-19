@@ -1,31 +1,7 @@
-transformers
-imageio==2.27.0
-decord==0.6.0
-gdown
+diffusers==0.33.1
+torch
+torchvision
 einops
-omegaconf
-safetensors
-gradio
-wandb
-accelerate>=0.16.0
-deepspeed
-tqdm
-numpy
-triton
-packaging
-pyre-extensions==0.0.29
-opencv-python
-matplotlib
-imageio[ffmpeg]
-torchsde
-oss2
-timeout_decorator
-pandas
-backoff
-peft
-piqa
-jsonlines
-torch --index-url https://download.pytorch.org/whl/cu124
-torchvision --index-url https://download.pytorch.org/whl/cu124
-torchaudio --index-url https://download.pytorch.org/whl/cu124
-diffusers==0.30.1
+transformer
+decord
+accelerate

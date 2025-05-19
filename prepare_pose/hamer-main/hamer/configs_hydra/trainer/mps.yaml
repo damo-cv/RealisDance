@@ -1,6 +1,0 @@
-defaults:
-  - default.yaml
-  - default_hamer.yaml
-
-accelerator: mps
-devices: 1

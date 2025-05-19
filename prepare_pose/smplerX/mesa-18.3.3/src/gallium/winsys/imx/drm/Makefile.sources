@@ -1,3 +1,0 @@
-C_SOURCES := \
-   imx_drm_public.h \
-   imx_drm_winsys.c
