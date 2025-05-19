@@ -6,3 +6,4 @@ transformer
 decord
 accelerate
 ftfy
+opencv-python
