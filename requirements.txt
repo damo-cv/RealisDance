@@ -5,3 +5,4 @@ einops
 transformer
 decord
 accelerate
+ftfy
