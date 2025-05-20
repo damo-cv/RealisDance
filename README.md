@@ -79,8 +79,6 @@ python setup.py install
 
 ### 2. Quick Inference
 
-- Prepare your reference image.
-
 - Inference with Demo sequences
 
 ```commandline
