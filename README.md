@@ -12,7 +12,7 @@ This repository is the official implementation of [RealisDance-DiT](https://arxi
 RealisDance-DiT is a structurally simple, empirically robust, and experimentally strong baseline model for controllable character animation in the wild.
 
 ## News
-- **2025-05-19**: Released RealisDance-DiT inference code.
+- **2025-05-19**: Released RealisDance-DiT inference code and weights.
 - **2024-05-19**: You may also be interested in our [Uni3C](https://github.com/ewrfcas/Uni3C).
 - **2024-10-15**: Released the code of pose preparation for RealisDance.
 - **2024-09-10**: Now you can try more interesting AI video editing in [XunGuang](https://xunguang.damo-vision.com/).
@@ -44,7 +44,7 @@ Please visit our [project page](https://thefoxofsky.github.io/project_pages/Real
 - [ ] FSDP + Sequential parallel
 - [ ] Pose paration code
 - [ ] RealisDance-Val dataset
-- [ ] Model checkpoints
+- [x] Model checkpoints
 - [x] Inference code
 
 Note: This released project has two slight differences between the paper.
