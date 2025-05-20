@@ -69,7 +69,7 @@ conda activate realisdance
 
 pip install -r requirements.txt
 
-# FA3
+# FA3 (Optional)
 git clone https://github.com/Dao-AILab/flash-attention.git
 cd flash-attention
 git checkout ea3ecea97a1393c092863330aff9a162bb5ce443  # very important, using other FA3 will yield bad results
