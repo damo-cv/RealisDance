@@ -4,7 +4,7 @@
 <img src='https://img.shields.io/badge/arXiv-red'></a> 
 <a href='https://thefoxofsky.github.io/project_pages/RealisDance-DiT/index'>
 <img src='https://img.shields.io/badge/Project-Page-orange'></a> 
-<a href='https://thefoxofsky.github.io/project_pages/RealisDance-DiT/index'>
+<a href='https://huggingface.co/datasets/theFoxofSky/RealisDance-Val'>
 <img src='https://img.shields.io/badge/Test-Dataset-blue'></a> 
 
 
