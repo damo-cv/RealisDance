@@ -13,7 +13,7 @@ RealisDance-DiT is a structurally simple, empirically robust, and experimentally
 
 ## News
 - **2025-05-19**: Released the inference code and weights of RealisDance-DiT.
-- **2024-05-19**: You may also be interested in our [Uni3C](https://github.com/ewrfcas/Uni3C).
+- **2025-05-19**: You may also be interested in our [Uni3C](https://github.com/ewrfcas/Uni3C).
 - **2024-10-15**: Released RealisDance and the code of pose preparation for RealisDance.
 - **2024-09-10**: Now you can try more interesting AI video editing in [XunGuang](https://xunguang.damo-vision.com/).
 - **2024-09-09**: You may also be interested in our human part repair method [RealisHuman](https://github.com/Wangbenzhi/RealisHuman).
