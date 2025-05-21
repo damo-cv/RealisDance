@@ -51,7 +51,7 @@ Note: This released project has two slight differences between the paper.
 
 1. We only use SMPL-CS and HaMer in this version in order to support Uni3C. 
 Because it is difficult to align and render DWPose in new camera view.
-2. (Coming soon) In the Shifted RoPE part, we also shifted frame. 
+2. (Coming soon) In the Shifted RoPE part, we also shifted the RoPE along the frame dimension.
 Because we find that share the first frame RoPE will sometimes introduce 
 slight artifacts at the first frame.
 
