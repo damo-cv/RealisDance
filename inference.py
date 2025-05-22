@@ -7,7 +7,6 @@ import torch
 from diffusers import AutoencoderKLWan
 from diffusers.utils import export_to_video
 from PIL import Image
-from src.models.rd_dit import RealisDanceDiT
 from src.pipelines.rd_dit_pipeline import RealisDanceDiTPipeline
 from transformers import CLIPVisionModel
 
@@ -87,9 +86,8 @@ def main():
         model_id, subfolder="image_encoder", torch_dtype=torch.float32
     )
     vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
-    trans = RealisDanceDiT.from_pretrained(model_id, subfolder="transformer", torch_dtype=torch.bfloat16)
     pipe = RealisDanceDiTPipeline.from_pretrained(
-        model_id, vae=vae, image_encoder=image_encoder, transformer=trans, torch_dtype=torch.bfloat16,
+        model_id, vae=vae, image_encoder=image_encoder, torch_dtype=torch.bfloat16,
     )
     pipe.enable_model_cpu_offload()
 
