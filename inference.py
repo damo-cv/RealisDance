@@ -53,14 +53,20 @@ def load_video(
 def main():
     # argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ref', type=str, default=None, help='path to reference image')
-    parser.add_argument('--smpl', type=str, default=None, help='Path to smpl video')
-    parser.add_argument('--hamer', type=str, default=None, help='Path to hamer video')
-    parser.add_argument('--prompt', type=str, default=None, help='Prompt for video')
-    parser.add_argument('--root', type=str, default=None, help='Root path for batch inference')
-    parser.add_argument('--save-dir', type=str, default="./output", help='Path to output folder')
-    parser.add_argument('--max-res', type=int, default=768 * 768, help='Resolution of the generated video')
-    parser.add_argument('--num-frames', type=int, default=81, help='Number of the generated video frames')
+    parser.add_argument('--ref', type=str, default=None, help='path to reference image.')
+    parser.add_argument('--smpl', type=str, default=None, help='Path to smpl video.')
+    parser.add_argument('--hamer', type=str, default=None, help='Path to hamer video.')
+    parser.add_argument('--prompt', type=str, default=None, help='Prompt for video.')
+    parser.add_argument('--root', type=str, default=None, help='Root path for batch inference.')
+    parser.add_argument('--save-dir', type=str, default="./output", help='Path to output folder.')
+    parser.add_argument('--ckpt', type=str, default="./pretrained_models", help='Path to checkpoint folder.')
+    parser.add_argument('--max-res', type=int, default=768 * 768, help='Resolution of the generated video.')
+    parser.add_argument('--num-frames', type=int, default=81, help='Number of the generated video frames.')
+    parser.add_argument('--save-gpu-memory', action='store_true', help='Save GPU memory, but will be super slow.')
+    parser.add_argument(
+        '--enable-teacache', action='store_true',
+        help='Enable teacache to accelerate inference. Note that enabling teacache may hurt generation quality.',
+    )
     args = parser.parse_args()
 
     # assign args
@@ -70,8 +76,11 @@ def main():
     prompt = args.prompt
     root = args.root
     save_dir = args.save_dir
+    ckpt = args.ckpt
     max_res = args.max_res
     num_frames = args.num_frames
+    save_gpu_memory = args.save_gpu_memory
+    enable_teacache = args.enable_teacache
     os.makedirs(save_dir, exist_ok=True)
 
     # check args
@@ -81,15 +90,19 @@ def main():
         print("WARNING: Will not use `ref` / `smpl` / `hamer` when `root` is not None.")
 
     # load model
-    model_id = "theFoxofSky/RealisDance-DiT"
+    model_id = ckpt
     image_encoder = CLIPVisionModel.from_pretrained(
         model_id, subfolder="image_encoder", torch_dtype=torch.float32
     )
     vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
     pipe = RealisDanceDiTPipeline.from_pretrained(
-        model_id, vae=vae, image_encoder=image_encoder, torch_dtype=torch.bfloat16,
+        model_id, vae=vae, image_encoder=image_encoder, torch_dtype=torch.bfloat16
     )
-    pipe.enable_model_cpu_offload()
+    if save_gpu_memory:
+        print("WARNING: Enable sequential cpu offload which will be super slow.")
+        pipe.enable_sequential_cpu_offload()
+    else:
+        pipe.enable_model_cpu_offload()
 
     # inference
     if root is not None:
@@ -111,7 +124,14 @@ def main():
                 for l in file.readlines():
                     prompt += l.strip()
 
-            output = pipe(image=ref_image, smpl=smpl, hamer=hamer, prompt=prompt, max_resolution=max_res).frames[0]
+            output = pipe(
+                image=ref_image,
+                smpl=smpl,
+                hamer=hamer,
+                prompt=prompt,
+                max_resolution=max_res,
+                enable_teacache=enable_teacache,
+            ).frames[0]
             export_to_video(output, output_path, fps=16)
     else:
         vid = os.path.splitext(os.path.basename(ref_path))[0]
@@ -120,7 +140,14 @@ def main():
         smpl = load_video(smpl_path, num_frames=num_frames)
         hamer = load_video(hamer_path, num_frames=num_frames)
         output_path = os.path.join(save_dir, f"{vid}_{pose_id}.mp4")
-        output = pipe(image=ref_image, smpl=smpl, hamer=hamer, prompt=prompt, max_resolution=max_res).frames[0]
+        output = pipe(
+            image=ref_image,
+            smpl=smpl,
+            hamer=hamer,
+            prompt=prompt,
+            max_resolution=max_res,
+            enable_teacache=enable_teacache,
+        ).frames[0]
         export_to_video(output, output_path, fps=16)
 
 
