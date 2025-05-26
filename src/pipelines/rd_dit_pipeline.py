@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import copy
 import html
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -532,6 +532,9 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         ] = None,
         callback_on_step_end_tensor_inputs: List[str] = ["latents"],
         max_sequence_length: int = 512,
+        enable_teacache: bool = False,
+        teacache_thresh: float = 0.2,
+        use_timestep_proj: bool = True,
     ):
         r"""
         The call function to the pipeline for generation.
@@ -602,6 +605,13 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
                 `._callback_tensor_inputs` attribute of your pipeline class.
             max_sequence_length (`int`, *optional*, defaults to `512`):
                 The maximum sequence length of the prompt.
+            enable_teacache (`bool`, *optional*, defaults to False):
+                Whether to use teacache to accelerate inference. Note that enabling teacache will hurt generation
+                quality.
+            teacache_thresh (`float`, *optional*, defaults to 0.2):
+                Threshold for teacache. Higher speedup will cause to worse quality.
+            use_timestep_proj (`bool`, *optional*, defaults to True):
+                Whether to use timestep_proj or temb.
         Examples:
 
         Returns:
@@ -681,6 +691,8 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
             null_image_embeds = self.encode_image(torch.zeros_like(image), device)
             null_image_embeds = null_image_embeds.repeat(batch_size, 1, 1)
             null_image_embeds = null_image_embeds.to(transformer_dtype)
+        else:
+            null_image_embeds = None
 
         # 4. Prepare timesteps
         self.scheduler.set_timesteps(num_inference_steps, device=device)
@@ -709,7 +721,28 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         ref_condition = ref_condition.to(transformer_dtype)
         null_ref_condition = null_ref_condition.to(transformer_dtype)
 
-        # 6. Denoising loop
+        # 6. TeaCache settings
+        if enable_teacache:
+            teacache_kwargs = {
+                "teacache_thresh": teacache_thresh,
+                "accumulated_rel_l1_distance": 0,
+                "previous_e0": None,
+                "previous_residual": None,
+                "use_timestep_proj": use_timestep_proj,
+                "coefficients": [
+                    8.10705460e+03, 2.13393892e+03, -3.72934672e+02, 1.66203073e+01, -4.17769401e-02
+                ] if use_timestep_proj else[
+                    -114.36346466, 65.26524496, -18.82220707, 4.91518089, -0.23412683
+                ],
+                "ret_steps": 5 if use_timestep_proj else 1,
+                "cutoff_steps": num_inference_steps
+            }
+            if self.do_classifier_free_guidance:
+                teacache_kwargs_uncond = copy.deepcopy(teacache_kwargs)
+        else:
+            teacache_kwargs = teacache_kwargs_uncond = None
+
+        # 7. Denoising loop
         num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
         self._num_timesteps = len(timesteps)
 
@@ -722,7 +755,7 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
                 latent_model_input = torch.cat([latents, i2v_condition], dim=1).to(transformer_dtype)
                 timestep = t.expand(latents.shape[0])
 
-                noise_pred = self.transformer(
+                noise_pred, teacache_kwargs = self.transformer(
                     hidden_states=latent_model_input,
                     timestep=timestep,
                     encoder_hidden_states=prompt_embeds,
@@ -731,10 +764,13 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
                     return_dict=False,
                     add_cond=pose_condition,
                     attn_cond=ref_condition,
-                )[0]
+                    enable_teacache=enable_teacache,
+                    current_step=i,
+                    teacache_kwargs=teacache_kwargs,
+                )
 
                 if self.do_classifier_free_guidance:
-                    noise_uncond = self.transformer(
+                    noise_uncond, teacache_kwargs_uncond = self.transformer(
                         hidden_states=latent_model_input,
                         timestep=timestep,
                         encoder_hidden_states=negative_prompt_embeds,
@@ -743,7 +779,10 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
                         return_dict=False,
                         add_cond=pose_condition,
                         attn_cond=null_ref_condition,
-                    )[0]
+                        enable_teacache=enable_teacache,
+                        current_step=i,
+                        teacache_kwargs=teacache_kwargs_uncond,
+                    )
                     noise_pred = noise_uncond + guidance_scale * (noise_pred - noise_uncond)
 
                 # compute the previous noisy sample x_t -> x_t-1
