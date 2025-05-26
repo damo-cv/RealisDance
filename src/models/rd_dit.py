@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import math
+from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple, Union
 
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -28,7 +30,13 @@ from diffusers.models.transformers.transformer_wan import (
     WanTimeTextImageEmbedding,
     WanTransformerBlock,
 )
-from diffusers.utils import USE_PEFT_BACKEND, logging, scale_lora_layers, unscale_lora_layers
+from diffusers.utils import (
+    USE_PEFT_BACKEND,
+    logging,
+    scale_lora_layers,
+    unscale_lora_layers,
+    BaseOutput,
+)
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
@@ -91,6 +99,12 @@ class ShiftedWanRotaryPosEmbed(WanRotaryPosEmbed):
         final_freqs = torch.cat((freqs, cond_freqs), dim=2)  # cat along sequence length
 
         return final_freqs
+
+
+@dataclass
+class RealisDanceDiTOutput(BaseOutput):
+    sample: "torch.Tensor"
+    teacache_kwargs: Optional[Dict[str, Any]] = None
 
 
 class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalModelMixin, CacheMixin):
@@ -228,6 +242,9 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
         attention_kwargs: Optional[Dict[str, Any]] = None,
         add_cond: Optional[torch.Tensor] = None,
         attn_cond: Optional[torch.Tensor] = None,
+        enable_teacache: bool = False,
+        current_step: int = 0,
+        teacache_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
         if attention_kwargs is not None:
             attention_kwargs = attention_kwargs.copy()
@@ -272,14 +289,48 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
             encoder_hidden_states = torch.concat([encoder_hidden_states_image, encoder_hidden_states], dim=1)
 
         # 4. Transformer blocks
-        if torch.is_grad_enabled() and self.gradient_checkpointing:
-            for block in self.blocks:
-                hidden_states = self._gradient_checkpointing_func(
-                    block, hidden_states, encoder_hidden_states, timestep_proj, rotary_emb
+        def _block_forward(x):
+            if torch.is_grad_enabled() and self.gradient_checkpointing:
+                for block in self.blocks:
+                    x = self._gradient_checkpointing_func(
+                        block, x, encoder_hidden_states, timestep_proj, rotary_emb
+                    )
+            else:
+                for block in self.blocks:
+                    x = block(x, encoder_hidden_states, timestep_proj, rotary_emb)
+            return x
+
+        if enable_teacache:
+            modulated_inp = timestep_proj if teacache_kwargs["use_timestep_proj"] else temb
+            if (
+                teacache_kwargs["previous_e0"] is None or
+                teacache_kwargs["previous_residual"] is None or
+                current_step < teacache_kwargs["ret_steps"] or
+                current_step >= teacache_kwargs["cutoff_steps"]
+            ):
+                should_calc = True
+            else:
+                rescale_func = np.poly1d(teacache_kwargs["coefficients"])
+                teacache_kwargs["accumulated_rel_l1_distance"] += rescale_func(
+                    (
+                        (modulated_inp - teacache_kwargs["previous_e0"]).abs().mean() /
+                        teacache_kwargs["previous_e0"].abs().mean()
+                    ).cpu().item()
                 )
+                if teacache_kwargs["accumulated_rel_l1_distance"] < teacache_kwargs["teacache_thresh"]:
+                    should_calc = False
+                else:
+                    should_calc = True
+                    teacache_kwargs["accumulated_rel_l1_distance"] = 0
+            teacache_kwargs["previous_e0"] = modulated_inp.clone()
+            if should_calc:
+                ori_hidden_states = hidden_states.clone()
+                hidden_states = _block_forward(hidden_states)
+                teacache_kwargs["previous_residual"] = hidden_states - ori_hidden_states
+            else:
+                hidden_states = hidden_states + teacache_kwargs["previous_residual"]
         else:
-            for block in self.blocks:
-                hidden_states = block(hidden_states, encoder_hidden_states, timestep_proj, rotary_emb)
+            hidden_states = _block_forward(hidden_states)
 
         # 5. Output norm, projection & unpatchify
         shift, scale = (self.scale_shift_table + temb.unsqueeze(1)).chunk(2, dim=1)
@@ -307,6 +358,6 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
             unscale_lora_layers(self, lora_scale)
 
         if not return_dict:
-            return (output,)
+            return (output, teacache_kwargs,)
 
-        return Transformer2DModelOutput(sample=output)
+        return RealisDanceDiTOutput(sample=output, teacache_kwargs=teacache_kwargs)

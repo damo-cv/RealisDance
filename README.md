@@ -39,13 +39,14 @@ Please visit our [project page](https://thefoxofsky.github.io/project_pages/Real
 </table>
 
 ## TODO List
-- [ ] SMPL retargeting 
-- [ ] TeaCache speedup
+- [x] Inference code
+- [x] Model checkpoints
+- [x] RealisDance-Val dataset
+- [x] TeaCache speedup
 - [ ] FSDP + Sequential parallel
 - [ ] Pose paration code
-- [ ] RealisDance-Val dataset
-- [x] Model checkpoints
-- [x] Inference code
+- [ ] SMPL retargeting 
+- [ ] New checkpoints with shifted RoPE on frame 
 
 Note: This released project has two slight differences between the paper.
 
@@ -77,7 +78,30 @@ cd hopper
 python setup.py install
 ```
 
-### 2. Quick Inference
+### 2. Download Checkpoints
+
+Please download the checkpoints from the huggingface repo to './pretrained_models'. 
+Please make sure the structure of './pretrained_models' is consistent with the one in the huggingface repo.
+
+```commandline
+./pretrained_models
+|---image_encoder/
+    |---...
+|---scheduler/
+    |---...
+|---text_encoder/
+    |---...
+|---tokenizer/
+    |---...
+|---transformer/
+    |---...
+|---vae/
+    |---...
+|---model_index.json
+```
+
+
+### 3. Quick Inference
 
 - Inference with Demo sequences
 
@@ -91,7 +115,33 @@ python inference.py \
     --save-dir ./output
 ```
 
-### 3. Custom Batch Inference
+- Inference with TeaCache for acceleration (Optional, may cause quality degradation)
+
+```commandline
+python inference.py \
+    --ref __assets__/demo/ref.png \
+    --smpl __assets__/demo/smpl.mp4 \
+    --hamer __assets__/demo/hamer.mp4 \
+    --prompt "A blonde girl is doing somersaults on the grass. Behind the grass is a river, \
+    and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
+    --save-dir ./output \
+    --enable-teacache
+```
+
+- Inference with small GPU memory (Optional, will be super slow)
+
+```commandline
+python inference.py \
+    --ref __assets__/demo/ref.png \
+    --smpl __assets__/demo/smpl.mp4 \
+    --hamer __assets__/demo/hamer.mp4 \
+    --prompt "A blonde girl is doing somersaults on the grass. Behind the grass is a river, \
+    and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
+    --save-dir ./output \
+    --save-gpu-memory
+```
+
+### 4. Custom Batch Inference
 
 - Prepare your reference images and conditions (coming soon)
 

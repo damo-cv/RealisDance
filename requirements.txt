@@ -7,3 +7,5 @@ decord
 accelerate
 ftfy
 opencv-python
+flash-attn
+xfuser[diffusers,flash-attn]
