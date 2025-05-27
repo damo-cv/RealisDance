@@ -80,7 +80,7 @@ python setup.py install
 
 ### 2. Download Checkpoints
 
-Please download the checkpoints from the huggingface repo to './pretrained_models'. 
+Please download the checkpoints from the [huggingface repo](https://huggingface.co/theFoxofSky/RealisDance-DiT) to './pretrained_models'. 
 Please make sure the structure of './pretrained_models' is consistent with the one in the huggingface repo.
 
 ```commandline
