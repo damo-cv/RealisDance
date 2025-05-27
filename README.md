@@ -3,7 +3,9 @@
 <a href='https://arxiv.org/abs/2504.14977'>
 <img src='https://img.shields.io/badge/arXiv-red'></a> 
 <a href='https://thefoxofsky.github.io/project_pages/RealisDance-DiT/index'>
-<img src='https://img.shields.io/badge/Project-Page-orange'></a> 
+<img src='https://img.shields.io/badge/Project-Page-green'></a> 
+<a href='https://huggingface.co/theFoxofSky/RealisDance-DiT'>
+<img src='https://img.shields.io/badge/Huggingface-orange'></a> 
 <a href='https://huggingface.co/datasets/theFoxofSky/RealisDance-Val'>
 <img src='https://img.shields.io/badge/Test-Dataset-blue'></a> 
 
