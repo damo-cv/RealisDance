@@ -169,7 +169,7 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         if resize_type == "max_resolution":
             ratio = ((tgt_h * tgt_w) / (ori_h * ori_w)) ** 0.5
             scale_factor_h = self.vae_scale_factor_spatial * self.transformer.config.patch_size[1]
-            h = round(ori_h * ratio / self.vae_scale_factor_spatial / scale_factor_h) * scale_factor_h
+            h = round(ori_h * ratio / scale_factor_h) * scale_factor_h
             scale_factor_w = self.vae_scale_factor_spatial * self.transformer.config.patch_size[2]
             w = round(ori_w * ratio / scale_factor_w) * scale_factor_w
             i = j = 0
