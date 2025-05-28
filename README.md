@@ -3,7 +3,9 @@
 <a href='https://arxiv.org/abs/2504.14977'>
 <img src='https://img.shields.io/badge/arXiv-red'></a> 
 <a href='https://thefoxofsky.github.io/project_pages/RealisDance-DiT/index'>
-<img src='https://img.shields.io/badge/Project-Page-orange'></a> 
+<img src='https://img.shields.io/badge/Project-Page-green'></a> 
+<a href='https://huggingface.co/theFoxofSky/RealisDance-DiT'>
+<img src='https://img.shields.io/badge/Huggingface-orange'></a> 
 <a href='https://huggingface.co/datasets/theFoxofSky/RealisDance-Val'>
 <img src='https://img.shields.io/badge/Test-Dataset-blue'></a> 
 
@@ -43,7 +45,7 @@ Please visit our [project page](https://thefoxofsky.github.io/project_pages/Real
 - [x] Model checkpoints
 - [x] RealisDance-Val dataset
 - [x] TeaCache speedup
-- [ ] FSDP + Sequential parallel
+- [x] FSDP + Sequential parallel
 - [ ] Pose paration code
 - [ ] SMPL retargeting 
 - [ ] New checkpoints with shifted RoPE on frame 
@@ -80,7 +82,7 @@ python setup.py install
 
 ### 2. Download Checkpoints
 
-Please download the checkpoints from the huggingface repo to './pretrained_models'. 
+Please download the checkpoints from the [huggingface repo](https://huggingface.co/theFoxofSky/RealisDance-DiT) to './pretrained_models'. 
 Please make sure the structure of './pretrained_models' is consistent with the one in the huggingface repo.
 
 ```commandline
@@ -128,7 +130,7 @@ python inference.py \
     --enable-teacache
 ```
 
-- Inference with small GPU memory (Optional, will be super slow)
+- Inference with small GPU memory (Optional, will be super slow. Can be used with TeaCache)
 
 ```commandline
 python inference.py \
@@ -139,6 +141,19 @@ python inference.py \
     and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
     --save-dir ./output \
     --save-gpu-memory
+```
+
+- Inference with multi GPUs (Optional. Can be used with TeaCache)
+
+```commandline
+CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nproc_per_node=4 inference.py \
+    --ref __assets__/demo/ref.png \
+    --smpl __assets__/demo/smpl.mp4 \
+    --hamer __assets__/demo/hamer.mp4 \
+    --prompt "A blonde girl is doing somersaults on the grass. Behind the grass is a river, \
+    and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
+    --save-dir ./output \
+    --multi-gpu
 ```
 
 ### 4. Custom Batch Inference
