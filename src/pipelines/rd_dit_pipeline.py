@@ -164,13 +164,14 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         self.vae_scale_factor_spatial = 2 ** len(self.vae.temperal_downsample) if getattr(self, "vae", None) else 8
         self.video_processor = VideoProcessor(vae_scale_factor=self.vae_scale_factor_spatial)
 
-    @staticmethod
-    def process_shape(video: torch.Tensor, tgt_h: int, tgt_w: int, resize_type: str) -> torch.Tensor:
+    def process_shape(self, video: torch.Tensor, tgt_h: int, tgt_w: int, resize_type: str) -> torch.Tensor:
         num_frame, ori_h, ori_w = video.shape[-3:]
         if resize_type == "max_resolution":
             ratio = ((tgt_h * tgt_w) / (ori_h * ori_w)) ** 0.5
-            h = round(ori_h * ratio / 16) * 16
-            w = round(ori_w * ratio / 16) * 16
+            scale_factor_h = self.vae_scale_factor_spatial * self.transformer.config.patch_size[1]
+            h = round(ori_h * ratio / scale_factor_h) * scale_factor_h
+            scale_factor_w = self.vae_scale_factor_spatial * self.transformer.config.patch_size[2]
+            w = round(ori_w * ratio / scale_factor_w) * scale_factor_w
             i = j = 0
             tgt_h = h
             tgt_w = w
@@ -641,8 +642,10 @@ class RealisDanceDiTPipeline(DiffusionPipeline, WanLoraLoaderMixin):
         if height is None or width is None:
             smpl_height, smpl_width = smpl.shape[-2:]
             ratio = (max_resolution / (smpl_height * smpl_width)) ** 0.5
-            height = round(smpl_height * ratio / 16) * 16
-            width = round(smpl_width * ratio / 16) * 16
+            scale_factor_h = self.vae_scale_factor_spatial * self.transformer.config.patch_size[1]
+            height = round(smpl_height * ratio / scale_factor_h) * scale_factor_h
+            scale_factor_w = self.vae_scale_factor_spatial * self.transformer.config.patch_size[2]
+            width = round(smpl_width * ratio / scale_factor_w) * scale_factor_w
 
         if num_frames % self.vae_scale_factor_temporal != 1:
             logger.warning(

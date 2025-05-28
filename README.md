@@ -45,7 +45,7 @@ Please visit our [project page](https://thefoxofsky.github.io/project_pages/Real
 - [x] Model checkpoints
 - [x] RealisDance-Val dataset
 - [x] TeaCache speedup
-- [ ] FSDP + Sequential parallel
+- [x] FSDP + Sequential parallel
 - [ ] Pose paration code
 - [ ] SMPL retargeting 
 - [ ] New checkpoints with shifted RoPE on frame 
@@ -130,7 +130,7 @@ python inference.py \
     --enable-teacache
 ```
 
-- Inference with small GPU memory (Optional, will be super slow)
+- Inference with small GPU memory (Optional, will be super slow. Can be used with TeaCache)
 
 ```commandline
 python inference.py \
@@ -141,6 +141,19 @@ python inference.py \
     and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
     --save-dir ./output \
     --save-gpu-memory
+```
+
+- Inference with multi GPUs (Optional. Can be used with TeaCache)
+
+```commandline
+CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nproc_per_node=4 inference.py \
+    --ref __assets__/demo/ref.png \
+    --smpl __assets__/demo/smpl.mp4 \
+    --hamer __assets__/demo/hamer.mp4 \
+    --prompt "A blonde girl is doing somersaults on the grass. Behind the grass is a river, \
+    and behind the river are trees and mountains. The girl is wearing black yoga pants and a black sports vest." \
+    --save-dir ./output \
+    --multi-gpu
 ```
 
 ### 4. Custom Batch Inference
