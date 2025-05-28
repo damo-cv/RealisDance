@@ -18,17 +18,19 @@ from typing import Any, Dict, Optional, Tuple, Union
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from diffusers import ModelMixin, CacheMixin
 from diffusers.configuration_utils import register_to_config, ConfigMixin
 from diffusers.loaders import PeftAdapterMixin, FromOriginalModelMixin
+from diffusers.models.attention_processor import Attention
 from diffusers.models.controlnet import zero_module
-from diffusers.models.modeling_outputs import Transformer2DModelOutput
 from diffusers.models.normalization import FP32LayerNorm
 from diffusers.models.transformers.transformer_wan import (
     WanRotaryPosEmbed,
     WanTimeTextImageEmbedding,
     WanTransformerBlock,
+    WanAttnProcessor2_0,
 )
 from diffusers.utils import (
     USE_PEFT_BACKEND,
@@ -38,7 +40,86 @@ from diffusers.utils import (
     BaseOutput,
 )
 
+from xfuser.core.distributed import (
+    get_sequence_parallel_rank,
+    get_sequence_parallel_world_size,
+    get_sp_group,
+)
+from xfuser.core.long_ctx_attention import xFuserLongContextAttention
+
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
+
+
+class AttnProcessorSP:
+    """
+    This processor will be used when enabling sequential parallelism.
+    """
+
+    def __init__(self):
+        if not hasattr(F, "scaled_dot_product_attention"):
+            raise ImportError("AttnProcessorSP requires PyTorch 2.0. To use it, please upgrade PyTorch to 2.0.")
+
+    def __call__(
+        self,
+        attn: Attention,
+        hidden_states: torch.Tensor,
+        encoder_hidden_states: Optional[torch.Tensor] = None,
+        attention_mask: Optional[torch.Tensor] = None,
+        rotary_emb: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        if encoder_hidden_states is None:
+            encoder_hidden_states = hidden_states
+
+        query = attn.to_q(hidden_states)
+        key = attn.to_k(encoder_hidden_states)
+        value = attn.to_v(encoder_hidden_states)
+
+        if attn.norm_q is not None:
+            query = attn.norm_q(query)
+        if attn.norm_k is not None:
+            key = attn.norm_k(key)
+
+        query = query.unflatten(2, (attn.heads, -1)).transpose(1, 2)
+        key = key.unflatten(2, (attn.heads, -1)).transpose(1, 2)
+        value = value.unflatten(2, (attn.heads, -1)).transpose(1, 2)
+
+        if rotary_emb is not None:
+
+            def apply_rotary_emb(hidden_states: torch.Tensor, freqs: torch.Tensor):
+                x_rotated = torch.view_as_complex(hidden_states.to(torch.float64).unflatten(3, (-1, 2)))
+                x_out = torch.view_as_real(x_rotated * freqs).flatten(3, 4)
+                return x_out.type_as(hidden_states)
+
+            query = apply_rotary_emb(query, rotary_emb)
+            key = apply_rotary_emb(key, rotary_emb)
+
+        if get_sequence_parallel_world_size() > 1:
+            # convert [batch, num_head, length, channel] -> [batch, length, num_head, channel]
+            query, key, value = query.transpose(1, 2), key.transpose(1, 2), value.transpose(1, 2)
+
+            # convert to half
+            def half(x):
+                return x if x.dtype in (torch.float16, torch.bfloat16) else x.to(torch.bfloat16)
+            original_dtype = query.dtype
+            query, key, value = half(query), half(key), half(value)
+
+            # do attention
+            hidden_states = xFuserLongContextAttention()(
+                None, query=query, key=key, value=value
+            )
+            # convert back
+            hidden_states = hidden_states.flatten(2, 3)
+            hidden_states = hidden_states.to(original_dtype)
+        else:
+            hidden_states = F.scaled_dot_product_attention(
+                query, key, value, attn_mask=attention_mask, dropout_p=0.0, is_causal=False
+            )
+            hidden_states = hidden_states.transpose(1, 2).flatten(2, 3)
+            hidden_states = hidden_states.type_as(query)
+
+        hidden_states = attn.to_out[0](hidden_states)
+        hidden_states = attn.to_out[1](hidden_states)
+        return hidden_states
 
 
 class ShiftedWanRotaryPosEmbed(WanRotaryPosEmbed):
@@ -231,6 +312,16 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
         self.scale_shift_table = nn.Parameter(torch.randn(1, 2, inner_dim) / inner_dim ** 0.5)
 
         self.gradient_checkpointing = False
+        self.sp_degree = 1
+
+    def set_sp_degree(self, sp_degree: int):
+        self.sp_degree = int(sp_degree)
+        if self.sp_degree > 1:
+            for block in self.blocks:
+                block.attn1.set_processor(AttnProcessorSP())  # only apply AttnProcessorSP to self-attn
+        else:
+            for block in self.blocks:
+                block.attn1.set_processor(WanAttnProcessor2_0())
 
     def forward(
         self,
@@ -289,6 +380,22 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
             encoder_hidden_states = torch.concat([encoder_hidden_states_image, encoder_hidden_states], dim=1)
 
         # 4. Transformer blocks
+        # for sp split
+        if self.sp_degree > 1:
+            original_seq_len = hidden_states.shape[1]
+            if True:  # original_seq_len % self.sp_degree != 0:
+                # TODO: We should use attention mask to prevent processing padding tokens.
+                # TODO: But currently, xFuserLongContextAttention does not support attention mask.
+                padding_num = self.sp_degree - original_seq_len % self.sp_degree
+                hidden_states = torch.cat(
+                    [hidden_states, hidden_states.new_zeros(
+                        hidden_states.shape[0], padding_num, hidden_states.shape[2])], dim=1)
+                rotary_emb = torch.cat(
+                    [rotary_emb, rotary_emb.new_zeros(
+                        rotary_emb.shape[0], rotary_emb.shape[1], padding_num, rotary_emb.shape[-1])], dim=2)
+            hidden_states = torch.chunk(hidden_states, self.sp_degree, dim=1)[get_sequence_parallel_rank()]
+            rotary_emb = torch.chunk(rotary_emb, self.sp_degree, dim=2)[get_sequence_parallel_rank()]
+
         def _block_forward(x):
             if torch.is_grad_enabled() and self.gradient_checkpointing:
                 for block in self.blocks:
@@ -331,6 +438,10 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
                 hidden_states = hidden_states + teacache_kwargs["previous_residual"]
         else:
             hidden_states = _block_forward(hidden_states)
+
+        # for sp gather
+        if self.sp_degree > 1:
+            hidden_states = get_sp_group().all_gather(hidden_states, dim=1)
 
         # 5. Output norm, projection & unpatchify
         shift, scale = (self.scale_shift_table + temb.unsqueeze(1)).chunk(2, dim=1)
