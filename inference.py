@@ -8,6 +8,7 @@ from diffusers import AutoencoderKLWan
 from diffusers.utils import export_to_video
 from PIL import Image
 from src.pipelines.rd_dit_pipeline import RealisDanceDiTPipeline
+from src.utils.dist_utils import hook_for_multi_gpu_inference, init_dist, is_main_process, set_seed
 from transformers import CLIPVisionModel
 
 import decord
@@ -62,7 +63,11 @@ def main():
     parser.add_argument('--ckpt', type=str, default="./pretrained_models", help='Path to checkpoint folder.')
     parser.add_argument('--max-res', type=int, default=768 * 768, help='Resolution of the generated video.')
     parser.add_argument('--num-frames', type=int, default=81, help='Number of the generated video frames.')
+    parser.add_argument('--seed', type=int, default=42, help='The generation seed.')
     parser.add_argument('--save-gpu-memory', action='store_true', help='Save GPU memory, but will be super slow.')
+    parser.add_argument(
+        '--multi-gpu', action='store_true', help='Enable FSDP and Sequential parallel for multi-GPU inference.',
+    )
     parser.add_argument(
         '--enable-teacache', action='store_true',
         help='Enable teacache to accelerate inference. Note that enabling teacache may hurt generation quality.',
@@ -79,7 +84,9 @@ def main():
     ckpt = args.ckpt
     max_res = args.max_res
     num_frames = args.num_frames
+    seed = args.seed
     save_gpu_memory = args.save_gpu_memory
+    multi_gpu = args.multi_gpu
     enable_teacache = args.enable_teacache
     os.makedirs(save_dir, exist_ok=True)
 
@@ -88,6 +95,13 @@ def main():
         raise ValueError("`root` and `ref` / `smpl` / `hamer` cannot be None at the same time.")
     elif root is not None and (ref_path is not None or smpl_path is not None or hamer_path is not None):
         print("WARNING: Will not use `ref` / `smpl` / `hamer` when `root` is not None.")
+    if save_gpu_memory and multi_gpu:
+        raise ValueError("`--multi-gpu` and `--save-gpu-memory` cannot be set at the same time.")
+
+    # init dist and set seed
+    if multi_gpu:
+        init_dist()
+    set_seed(seed)
 
     # load model
     model_id = ckpt
@@ -101,29 +115,34 @@ def main():
     if save_gpu_memory:
         print("WARNING: Enable sequential cpu offload which will be super slow.")
         pipe.enable_sequential_cpu_offload()
+    elif multi_gpu:
+        pipe = hook_for_multi_gpu_inference(pipe)
     else:
         pipe.enable_model_cpu_offload()
 
     # inference
-    if root is not None:
+    if root is not None:  # batch inference
         for ref_path in glob.glob(os.path.join(root, "ref", "*")):
             if not is_image(ref_path):
                 continue
+
+            # path process
             vid = os.path.splitext(os.path.basename(ref_path))[0]
+            output_path = os.path.join(save_dir, f"{vid}.mp4")
             smpl_path = os.path.join(root, "smpl", f"{vid}.mp4")
             hamer_path = os.path.join(root, "hamer", f"{vid}.mp4")
             prompt_path = os.path.join(root, "prompt", f"{vid}.txt")
-            output_path = os.path.join(save_dir, f"{vid}.mp4")
 
-            # prepare inputs
-            ref_image = load_image(ref_path)
-            smpl = load_video(smpl_path, num_frames=num_frames)
-            hamer = load_video(hamer_path, num_frames=num_frames)
+            # prompt process
             prompt = ""
             with open(prompt_path, 'r', encoding='utf-8') as file:
                 for l in file.readlines():
                     prompt += l.strip()
 
+            # prepare inputs, inference, and save
+            ref_image = load_image(ref_path)
+            smpl = load_video(smpl_path, num_frames=num_frames)
+            hamer = load_video(hamer_path, num_frames=num_frames)
             output = pipe(
                 image=ref_image,
                 smpl=smpl,
@@ -132,14 +151,18 @@ def main():
                 max_resolution=max_res,
                 enable_teacache=enable_teacache,
             ).frames[0]
-            export_to_video(output, output_path, fps=16)
-    else:
+            if is_main_process():
+                export_to_video(output, output_path, fps=16)
+    else:  # single sample inference
+        # path process
         vid = os.path.splitext(os.path.basename(ref_path))[0]
         pose_id = os.path.splitext(os.path.basename(smpl_path))[0]
+        output_path = os.path.join(save_dir, f"{vid}_{pose_id}.mp4")
+
+        # prepare inputs, inference, and save
         ref_image = load_image(ref_path)
         smpl = load_video(smpl_path, num_frames=num_frames)
         hamer = load_video(hamer_path, num_frames=num_frames)
-        output_path = os.path.join(save_dir, f"{vid}_{pose_id}.mp4")
         output = pipe(
             image=ref_image,
             smpl=smpl,
@@ -148,7 +171,8 @@ def main():
             max_resolution=max_res,
             enable_teacache=enable_teacache,
         ).frames[0]
-        export_to_video(output, output_path, fps=16)
+        if is_main_process():
+            export_to_video(output, output_path, fps=16)
 
 
 if __name__ == "__main__":
