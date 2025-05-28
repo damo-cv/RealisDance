@@ -2,10 +2,10 @@ diffusers==0.33.1
 torch
 torchvision
 einops
-transformer
+transformers
 decord
 accelerate
 ftfy
 opencv-python
-flash-attn
+flash-attn>2.6.3
 xfuser[diffusers,flash-attn]
