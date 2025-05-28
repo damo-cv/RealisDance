@@ -63,7 +63,7 @@ def main():
     parser.add_argument('--ckpt', type=str, default="./pretrained_models", help='Path to checkpoint folder.')
     parser.add_argument('--max-res', type=int, default=768 * 768, help='Resolution of the generated video.')
     parser.add_argument('--num-frames', type=int, default=81, help='Number of the generated video frames.')
-    parser.add_argument('--seed', type=int, default=42, help='The generation seed.')
+    parser.add_argument('--seed', type=int, default=1024, help='The generation seed.')
     parser.add_argument('--save-gpu-memory', action='store_true', help='Save GPU memory, but will be super slow.')
     parser.add_argument(
         '--multi-gpu', action='store_true', help='Enable FSDP and Sequential parallel for multi-GPU inference.',
