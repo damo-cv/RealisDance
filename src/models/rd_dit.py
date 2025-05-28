@@ -383,7 +383,7 @@ class RealisDanceDiT(ModelMixin, ConfigMixin, PeftAdapterMixin, FromOriginalMode
         # for sp split
         if self.sp_degree > 1:
             original_seq_len = hidden_states.shape[1]
-            if True:  # original_seq_len % self.sp_degree != 0:
+            if original_seq_len % self.sp_degree != 0:
                 # TODO: We should use attention mask to prevent processing padding tokens.
                 # TODO: But currently, xFuserLongContextAttention does not support attention mask.
                 padding_num = self.sp_degree - original_seq_len % self.sp_degree
